@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxfy - Painel Administrativo</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/icon/icon.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        fluxfy: {
+                            yellow: '#F5C71A',
+                            dark: '#D4A810',
+                            black: '#111111'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js" defer></script>
+    <script src="admin.js" defer></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 h-screen flex overflow-hidden transition-colors duration-300 text-gray-800 dark:text-gray-200">
+
+    <!-- Sidebar (Menu Lateral) -->
+    <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:flex flex-col transition-colors duration-300">
+        <div class="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-700">
+            <img src="assets/logo.png" alt="Fluxfy Logo" class="h-10 object-contain">
+        </div>
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <a href="#" class="flex items-center gap-3 bg-fluxfy-yellow/10 dark:bg-fluxfy-yellow/20 text-fluxfy-dark dark:text-fluxfy-yellow px-4 py-3 rounded-lg font-medium transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                Visão Geral
+            </a>
+            <a href="#" class="flex items-center gap-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-3 rounded-lg font-medium transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                Aprovações
+            </a>
+            <a href="#" class="flex items-center gap-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-3 rounded-lg font-medium transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                Estoque
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+            <button id="btnLogout" class="w-full flex items-center gap-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 px-4 py-2 rounded-lg font-medium transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Sair
+            </button>
+        </div>
+    </aside>
+
+    <!-- Área de Conteúdo Principal -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <!-- Header (Topo) -->
+        <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 transition-colors duration-300">
+            <h1 class="text-xl font-bold text-gray-800 dark:text-white">Dashboard Administrativo</h1>
+            
+            <div class="flex items-center gap-4">
+                <!-- Botão Flutuante de Dark Mode (Reaproveitado do theme.js) -->
+                <button id="theme-toggle" type="button" aria-label="Alternar tema claro e escuro" title="Alternar tema claro e escuro" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 transition-colors">
+                    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                    <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                </button>
+                <div class="h-8 w-8 rounded-full bg-fluxfy-yellow text-fluxfy-black flex items-center justify-center font-bold">
+                    A
+                </div>
+            </div>
+        </header>
+
+        <!-- Conteúdo Rolável -->
+        <div class="flex-1 overflow-y-auto p-6">
+            
+            <!-- Cards de Resumo -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Vendas Hoje</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2">R$ 450,00</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Itens em Estoque Baixo</p>
+                    <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-2">3</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Solicitações Pendentes</p>
+                    <p class="text-2xl font-bold text-fluxfy-dark dark:text-fluxfy-yellow mt-2" id="contadorPendentes">Carregando...</p>
+                </div>
+            </div>
+
+            <!-- Tabela de Aprovação de Usuários -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Aprovação de Operadores (Caixa)</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-sm">
+                                <th class="px-6 py-3 font-medium">Nome</th>
+                                <th class="px-6 py-3 font-medium">E-mail</th>
+                                <th class="px-6 py-3 font-medium">Data da Solicitação</th>
+                                <th class="px-6 py-3 font-medium text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaUsuarios" class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <!-- As linhas serão inseridas aqui via JavaScript -->
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                    Buscando solicitações...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</body>
+</html>
