@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxfy - Login</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        fluxfy: {
+                            yellow: '#F5C71A',
+                            dark: '#D4A810',
+                            black: '#111111'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="theme.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 h-screen flex items-center justify-center p-4 transition-colors duration-300">
+
+    <!-- Botão Flutuante de Dark Mode -->
+    <button id="theme-toggle" type="button" aria-label="Alternar tema claro e escuro" title="Alternar tema claro e escuro" class="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 transition-colors">
+        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+    </button>
+
+    <div class="max-w-md w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transition-colors duration-300 border border-transparent dark:border-gray-700">
+        
+        <div class="text-center mb-8">
+            <img src="imagens/logo.png" alt="Logo Fluxfy" class="mx-auto h-28 object-contain">
+            <p class="text-gray-500 dark:text-gray-400 text-sm mt-2 transition-colors">Faça login para acessar o sistema</p>
+        </div>
+
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="email">E-mail do Operador</label>
+                <input type="email" id="email" required
+                    class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
+                    placeholder="operador@cantina.com">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="password">Senha</label>
+                <input type="password" id="password" required
+                    class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
+                    placeholder="••••••••">
+            </div>
+
+            <button type="submit" id="btnSubmit"
+                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-fluxfy-black bg-fluxfy-yellow hover:bg-fluxfy-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fluxfy-yellow transition-colors">
+                Entrar com E-mail
+            </button>
+        </form>
+
+        <div class="flex items-center my-6">
+            <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+            <span class="flex-shrink-0 mx-4 text-gray-400 dark:text-gray-500 text-sm">ou</span>
+            <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+        </div>
+
+        <button type="button" id="btnGoogle"
+            class="w-full flex justify-center items-center py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors">
+            <svg class="h-5 w-5 mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Entrar com o Google
+        </button>
+
+        <p id="feedbackMessage" class="mt-4 text-center text-sm hidden"></p>
+
+        <p class="mt-8 text-center text-sm text-gray-600 dark:text-gray-400">
+            Não tem uma conta? 
+            <a href="cadastro.html" class="text-fluxfy-dark dark:text-fluxfy-yellow hover:underline font-semibold transition-colors">Solicite acesso</a>
+        </p>
+    </div>
+
+</body>
+</html>

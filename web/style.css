@@ -1,0 +1,11 @@
+/* 
+ * style.css
+ * Arquivo reservado para as regras de estilo personalizadas.
+ * Como o projeto utiliza Tailwind CSS em sua base, este arquivo serve para 
+ * customizações específicas elaboradas pela área de UX que ultrapassam as 
+ * classes utilitárias ou para a importação de tipografias externas.
+ */
+
+body {
+    margin: 0; 
+}
