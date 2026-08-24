@@ -23,6 +23,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.getElementById('password').value;
             const btnSubmit = document.getElementById('btnSubmit');
 
+            // SIMULAÇÃO PROVISÓRIA DE LOGIN (Apague quando a API estiver pronta)
+            //if (email === "teste@fluxfy.com" && password === "123456") {
+            //localStorage.setItem('tokenCantina', 'token-falso-de-teste');
+            //window.location.href = 'admin.html';
+            //return; // O return impede que o código continue e tente chamar a API
+            //}
+
             const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
             if (!emailRegex.test(email)) {
@@ -52,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('tokenCantina', data.token);
                     feedback.textContent = 'Login aprovado! Redirecionando...';
                     feedback.className = 'mt-4 text-center text-sm text-green-600 dark:text-green-400 block';
-                    // window.location.href = '/pdv.html'; 
+                    window.location.href = '/admin.html'; 
                 } else {
                     let errorMessage = 'Erro ao processar o login. Tente novamente.';
                     if (response.status === 404) {
