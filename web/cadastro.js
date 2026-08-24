@@ -6,19 +6,19 @@
 document.addEventListener('DOMContentLoaded', () => {
     const cadastroForm = document.getElementById('cadastroForm');
     const feedback = document.getElementById('feedbackMessage');
-    const emailInput = document.getElementById('email'); 
+    const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirmPassword');
     const btnGoogleCadastro = document.getElementById('btnGoogleCadastro');
 
     if (emailInput) {
-        emailInput.addEventListener('input', function() {
+        emailInput.addEventListener('input', function () {
             this.value = this.value.replace(/[^a-zA-Z0-9.\-_@]/g, '');
         });
     }
 
     if (cadastroForm) {
-        cadastroForm.addEventListener('submit', async function(event) {
+        cadastroForm.addEventListener('submit', async function (event) {
             event.preventDefault();
 
             const nome = document.getElementById('nome').value.trim();
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             feedback.classList.add('hidden');
 
             try {
-                const response = await fetch('https://api-da-karol.onrender.com/api/cadastro', {
+                const response = await fetch('http://127.0.0.1:8000/api/cadastro', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome: nome, email: email, password: password })
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok) {
                     feedback.textContent = 'Solicitação enviada com sucesso! Aguarde a aprovação do administrador.';
                     feedback.className = 'mt-4 text-center text-sm font-semibold text-green-600 dark:text-green-400 block';
-                    cadastroForm.reset(); 
+                    cadastroForm.reset();
                 } else {
                     let errorMessage = 'Erro ao solicitar cadastro. Tente novamente.';
                     if (response.status === 409) {
