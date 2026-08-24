@@ -7,16 +7,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const btnGoogle = document.getElementById('btnGoogle');
     const feedback = document.getElementById('feedbackMessage');
-    const emailInput = document.getElementById('email'); 
+    const emailInput = document.getElementById('email');
 
     if (emailInput) {
-        emailInput.addEventListener('input', function() {
+        emailInput.addEventListener('input', function () {
             this.value = this.value.replace(/[^a-zA-Z0-9.\-_@]/g, '');
         });
     }
 
     if (loginForm) {
-        loginForm.addEventListener('submit', async function(event) {
+        loginForm.addEventListener('submit', async function (event) {
             event.preventDefault();
 
             const email = emailInput.value.trim();
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             feedback.classList.add('hidden');
 
             try {
-                const response = await fetch('https://api-da-karol.onrender.com/api/login', {
+                const response = await fetch('http://127.0.0.1:8000/api/cadastro', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email, password: password })
