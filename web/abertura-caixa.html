@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxfy - Abertura de Caixa</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/icon/icon.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        fluxfy: {
+                            yellow: '#F5C71A',
+                            dark: '#D4A810',
+                            black: '#111111'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Scripts -->
+    <script src="theme.js" defer></script>
+    <script src="abertura-caixa.js" defer></script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300">
+
+    <!-- Topo Simples com Botão Dark Mode -->
+    <div class="absolute top-4 right-4 flex items-center gap-4">
+        <button id="theme-toggle" type="button" aria-label="Alternar tema" title="Alternar tema" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 transition-colors">
+            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+        </button>
+        <button id="btnLogout" class="text-sm font-medium text-red-600 dark:text-red-400 hover:underline">Sair</button>
+    </div>
+
+    <!-- Card Principal -->
+    <div class="max-w-md w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transition-colors duration-300 border border-transparent dark:border-gray-700">
+        
+        <div class="text-center mb-6">
+            <img src="assets/logo.png" alt="Logo Fluxfy" class="mx-auto h-20 object-contain">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-4">Abertura de Caixa</h2>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Olá, <span id="nomeOperador" class="font-semibold text-fluxfy-dark dark:text-fluxfy-yellow">Operador</span>! Informe o saldo inicial.</p>
+        </div>
+
+        <form id="aberturaForm" class="space-y-6">
+            
+            <!-- Campo de Valor Inicial -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" for="valorInicial">Fundo de Troco (R$)</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span class="text-gray-500 dark:text-gray-400 font-medium">R$</span>
+                    </div>
+                    <input type="number" id="valorInicial" required min="0" step="0.01"
+                        class="block w-full pl-10 pr-4 py-3 text-lg font-bold bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors"
+                        placeholder="0,00" value="0.00">
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Valor físico disponível na gaveta antes das vendas.</p>
+            </div>
+
+            <!-- Botão de Confirmação -->
+            <button type="submit" id="btnAbrirCaixa"
+                class="w-full flex justify-center py-4 px-4 border border-transparent rounded-lg shadow-sm text-base font-bold text-fluxfy-black bg-fluxfy-yellow hover:bg-fluxfy-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fluxfy-yellow transition-colors">
+                Confirmar e Abrir PDV
+            </button>
+        </form>
+
+        <p id="feedbackMessage" class="mt-4 text-center text-sm hidden"></p>
+    </div>
+
+</body>
+</html>
