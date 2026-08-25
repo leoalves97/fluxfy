@@ -23,17 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.getElementById('password').value;
             const btnSubmit = document.getElementById('btnSubmit');
 
-            // SIMULAÇÃO PROVISÓRIA DE LOGIN (Apague quando a API estiver pronta)
-            if (email === "testeadm@fluxfy.com" && password === "123456") {
-            localStorage.setItem('tokenCantina', 'token-falso-de-teste');
-            window.location.href = 'admin.html';
-            return; // O return impede que o código continue e tente chamar a API
-            } else if (email === "testecaixa@fluxfy.com" && password === "123456") {
-                localStorage.setItem('tokenCantina', 'token-colaborador');
-                window.location.href = 'abertura-caixa.html';
-                return; 
-            }
-
             const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
             if (!emailRegex.test(email)) {
