@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
 
-# Isso força o Python a ler o arquivo .env e sobreescrever variáveis velhas
+# forçar o Python a ler o arquivo .env e sobreescrever variáveis velhas
 load_dotenv(override=True) 
 
 # Pega a URL do arquivo .env
