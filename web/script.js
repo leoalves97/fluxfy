@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('tokenCantina', data.token);
                     feedback.textContent = 'Login aprovado! Redirecionando...';
                     feedback.className = 'mt-4 text-center text-sm text-green-600 dark:text-green-400 block';
-                    window.location.href = '/admin.html'; 
+                    window.location.href = 'admin.html';
                 } else {
                     let errorMessage = 'Erro ao processar o login. Tente novamente.';
                     if (response.status === 404) {
