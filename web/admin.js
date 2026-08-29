@@ -4,7 +4,7 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // 1. Verificação de Segurança (Proteger a Rota)
     // Se não houver token no LocalStorage, chuta o usuário de volta para o login.
     const token = localStorage.getItem('tokenCantina');
@@ -27,27 +27,28 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Função que simula a busca de usuários pendentes na API
+ * Função que busca os usuários pendentes na API
  */
 async function carregarUsuariosPendentes() {
     const tabela = document.getElementById('tabelaUsuarios');
     const contador = document.getElementById('contadorPendentes');
 
     try {
-        /*
-         * Integração real com o Back-end
-         * fetch('https://api-da-karol.onrender.com/api/usuarios/pendentes', { ... })
-         */
-        
-        // Simulação de resposta da API para prototipagem
-        const usuariosMock = [
-            { id: 1, nome: 'Carlos Eduardo', email: 'carlos@email.com', data: '24/08/2026' },
-            { id: 2, nome: 'Ana Souza', email: 'ana.souza@email.com', data: '24/08/2026' }
-        ];
+        // Faz a requisição para o Back-end
+        const response = await fetch('http://127.0.0.1:8000/api/usuarios/pendentes');
 
-        tabela.innerHTML = ''; // Limpa o "Buscando..."
-        
-        if (usuariosMock.length === 0) {
+        // Valida se a requisição deu erro (caso servidor desligado por exemplo
+        if (!response.ok) {
+            throw new Error('Falha ao buscar os dados na API');
+        }
+
+        // Converte a resposta para um array de objetos JavaScript
+        const usuariosReais = await response.json();
+
+        tabela.innerHTML = '';
+
+        //Se o array vier vazio, mostra mensagem e zera o contador
+        if (usuariosReais.length === 0) {
             contador.textContent = '0';
             tabela.innerHTML = `
                 <tr>
@@ -58,16 +59,21 @@ async function carregarUsuariosPendentes() {
             return;
         }
 
-        contador.textContent = usuariosMock.length;
+        // Atualiza o número de pendentes no card do apinel
+        contador.textContent = usuariosReais.length;
 
-        // Monta as linhas da tabela
-        usuariosMock.forEach(user => {
+        // Percorre cada usuário que veio do banco de dados e cria a linha
+        usuariosReais.forEach(user => {
             const tr = document.createElement('tr');
             tr.className = "hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors";
+
+            // Tratativa caso a coluna de data ainda não exista
+            const dataExibicao = user.data_criacao ? new Date(user.data_criacao).toLocaleDateString('pt-BR') : '-';
+
             tr.innerHTML = `
                 <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">${user.nome}</td>
                 <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">${user.email}</td>
-                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">${user.data}</td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">${dataExibicao}</td>
                 <td class="px-6 py-4 text-sm text-right space-x-2">
                     <button onclick="aprovarUsuario(${user.id})" class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-md hover:bg-green-200 dark:hover:bg-green-900/50 font-medium transition-colors">
                         Aprovar
@@ -78,6 +84,7 @@ async function carregarUsuariosPendentes() {
                 </td>
             `;
             tabela.appendChild(tr);
+
         });
 
     } catch (error) {
@@ -92,13 +99,13 @@ async function carregarUsuariosPendentes() {
 }
 
 // Funções de ação (Devem fazer chamadas PUT/DELETE para a API posteriormente)
-window.aprovarUsuario = function(id) {
+window.aprovarUsuario = function (id) {
     alert(`Usuário ID ${id} aprovado com sucesso! (Integração pendente)`);
     // Após aprovar, chama carregarUsuariosPendentes() novamente para atualizar a tabela
 };
 
-window.rejeitarUsuario = function(id) {
-    if(confirm('Tem certeza que deseja rejeitar esta solicitação?')) {
+window.rejeitarUsuario = function (id) {
+    if (confirm('Tem certeza que deseja rejeitar esta solicitação?')) {
         alert(`Usuário ID ${id} rejeitado! (Integração pendente)`);
     }
 };
