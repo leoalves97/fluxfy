@@ -10,3 +10,6 @@ env/
 
 # Ignorar variáveis de ambiente 
 .env
+
+# Ignorar arquivos de config inicial
+criaradmin.py
