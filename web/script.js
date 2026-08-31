@@ -5,9 +5,66 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
-    const btnGoogle = document.getElementById('btnGoogle');
     const feedback = document.getElementById('feedbackMessage');
     const emailInput = document.getElementById('email');
+
+    // --- LÓGICA DO POPUP DO GOOGLE AUTH ---
+    const params = new URLSearchParams(window.location.search);
+    const authStatus = params.get('auth_status');
+
+    if (authStatus) {
+        // Verifica se essa tela foi aberta por outra (ou seja, se é um pop-up)
+        if (window.opener) {
+            // Envia os dados para a tela principal
+            window.opener.postMessage({
+                type: 'GOOGLE_AUTH_RESULT',
+                status: authStatus,
+                email: params.get('email')
+            }, '*');
+
+            // Fecha o pop-up
+            window.close();
+            return; // Para a execução do script aqui dentro do pop-up
+        }
+    }
+
+    // A tela principal fica escutando as mensagens que chegam do Pop-up
+    window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'GOOGLE_AUTH_RESULT') {
+            if (event.data.status === 'pendente') {
+                feedback.textContent = 'Cadastro via Google realizado! Aguardando aprovação do administrador.';
+                feedback.className = 'mt-4 text-center text-sm text-yellow-600 dark:text-yellow-400 block';
+                feedback.classList.remove('hidden');
+            }
+            else if (event.data.status === 'sucesso') {
+                feedback.textContent = `Login aprovado para ${event.data.email}! Redirecionando...`;
+                feedback.className = 'mt-4 text-center text-sm text-green-600 dark:text-green-400 block';
+                feedback.classList.remove('hidden');
+
+                setTimeout(() => {
+                    window.location.href = 'admin.html';
+                }, 2000);
+            }
+        }
+    });
+
+    // Captura o clique no botão para abrir o Pop-up
+    const btnGoogle = document.getElementById('btnGoogle');
+    if (btnGoogle) {
+        btnGoogle.addEventListener('click', () => {
+            // Configurações para abrir a janela centralizada
+            const largura = 500;
+            const altura = 600;
+            const left = (screen.width - largura) / 2;
+            const top = (screen.height - altura) / 2;
+
+            window.open(
+                'http://127.0.0.1:8000/api/auth/google/login',
+                'GoogleAuthWindow',
+                `width=${largura},height=${altura},top=${top},left=${left}`
+            );
+        });
+    }
 
     if (emailInput) {
         emailInput.addEventListener('input', function () {
@@ -76,11 +133,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (btnGoogle) {
-        btnGoogle.addEventListener('click', () => {
-            feedback.textContent = 'Redirecionando para os servidores do Google...';
-            feedback.className = 'mt-4 text-center text-sm text-blue-600 dark:text-blue-400 block';
-            alert('A integração real com o Google OAuth será conectada à API nesta etapa.');
-        });
-    }
 });

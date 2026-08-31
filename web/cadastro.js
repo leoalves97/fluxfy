@@ -9,7 +9,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirmPassword');
-    const btnGoogleCadastro = document.getElementById('btnGoogleCadastro');
+    const btnGoogle = document.getElementById('btnGoogle');
+
+    // --- LÓGICA DO POPUP DO GOOGLE AUTH ---
+
+    //  A tela principal de cadastro fica escutando as mensagens do Pop-up
+    window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'GOOGLE_AUTH_RESULT') {
+            if (event.data.status === 'pendente') {
+                feedback.textContent = 'Cadastro via Google realizado! Aguardando aprovação do administrador.';
+                feedback.className = 'mt-4 text-center text-sm font-semibold text-yellow-600 dark:text-yellow-400 block';
+                feedback.classList.remove('hidden');
+            }
+            else if (event.data.status === 'sucesso') {
+                feedback.textContent = `Login aprovado para ${event.data.email}! Redirecionando para o painel...`;
+                feedback.className = 'mt-4 text-center text-sm font-semibold text-green-600 dark:text-green-400 block';
+                feedback.classList.remove('hidden');
+
+                setTimeout(() => {
+                    window.location.href = 'admin.html';
+                }, 2000);
+            }
+        }
+    });
+
+    // Captura o clique no botão de cadastro para abrir o Pop-up
+    if (btnGoogle) {
+        btnGoogle.addEventListener('click', () => {
+            const largura = 500;
+            const altura = 600;
+            const left = (screen.width - largura) / 2;
+            const top = (screen.height - altura) / 2;
+
+            window.open(
+                'http://127.0.0.1:8000/api/auth/google/login',
+                'GoogleAuthWindow',
+                `width=${largura},height=${altura},top=${top},left=${left}`
+            );
+        });
+    }
 
     if (emailInput) {
         emailInput.addEventListener('input', function () {
@@ -78,11 +116,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (btnGoogleCadastro) {
-        btnGoogleCadastro.addEventListener('click', () => {
-            feedback.textContent = 'Redirecionando para os servidores do Google para identificação...';
-            feedback.className = 'mt-4 text-center text-sm text-blue-600 dark:text-blue-400 block';
-            alert('O fluxo de cadastro/login com Google será unificado pela API.');
-        });
-    }
 });
