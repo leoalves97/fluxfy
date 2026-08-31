@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 from database import engine, SessionLocal
 import models
+from chatbot import router as chatbot_router
 
 # Função para criar uma sessão de banco de dados por requisição
 def get_db():
@@ -26,6 +27,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(chatbot_router)
 
 class UsuarioCreate(BaseModel):
     nome: str
