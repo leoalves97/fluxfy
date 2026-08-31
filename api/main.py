@@ -5,9 +5,9 @@ from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from passlib.context import CryptContext
-from database import engine, SessionLocal
-import models
-from chatbot import router as chatbot_router
+from api.database import engine, SessionLocal
+from api import models
+from api.chatbot import router as chatbot_router
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
