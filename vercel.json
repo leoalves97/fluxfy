@@ -5,7 +5,7 @@
       "use": "@vercel/python"
     },
     {
-      "src": "**/*.html",
+      "src": "web/**",
       "use": "@vercel/static"
     }
   ],
@@ -13,6 +13,10 @@
     {
       "src": "/api/(.*)",
       "dest": "api/main.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/web/$1"
     }
   ]
 }
