@@ -22,11 +22,17 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Fluxfy API")
 
-# --- CONFIGURAÇÕES DO GOOGLE ---
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-GOOGLE_REDIRECT_URI = "http://127.0.0.1:8000/api/auth/google/callback"
-FRONTEND_URL = "http://127.0.0.1:5500" # Altere se a porta do seu Live Server for diferente
+
+# --- CONFIGURAÇÕES DO GOOGLE E AMBIENTE ---
+# Se a variável de ambiente estiver definida (produção), usa ela; senão, usa o localhost para testes locais
+PRODUCTION_URL = os.getenv("VERCEL_URL") 
+
+if PRODUCTION_URL:
+    GOOGLE_REDIRECT_URI = f"https://{PRODUCTION_URL}/api/auth/google/callback"
+    FRONTEND_URL = f"https://{PRODUCTION_URL}"
+else:
+    GOOGLE_REDIRECT_URI = "http://127.0.0.1:8000/api/auth/google/callback"
+    FRONTEND_URL = "http://127.0.0.1:5500"
 
 # Libera o CORS para o frontend local conseguir se comunicar
 app.add_middleware(
