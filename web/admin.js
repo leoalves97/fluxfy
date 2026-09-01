@@ -35,7 +35,7 @@ async function carregarUsuariosPendentes() {
 
     try {
         // Faz a requisição para o Back-end
-        const response = await fetch('http://127.0.0.1:8000/api/usuarios/pendentes');
+        const response = await fetch('http://3.21.52.233:8000/api/usuarios/pendentes');
 
         // Valida se a requisição deu erro (caso servidor desligado por exemplo
         if (!response.ok) {
