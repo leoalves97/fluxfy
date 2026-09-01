@@ -24,16 +24,20 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Fluxfy API")
 
-# --- CONFIGURAÇÕES DO GOOGLE ---
+# --- CONFIGURAÇÕES DO GOOGLE E AMBIENTE ---
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+
+# --- CONFIGURAÇÕES DE AMBIENTE ---
 BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
-GOOGLE_REDIRECT_URI = f"{BACKEND_URL}/api/auth/google/callback"
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://127.0.0.1:5500")
 
-if PRODUCTION_URL:
-    GOOGLE_REDIRECT_URI = f"https://{PRODUCTION_URL}/api/auth/google/callback"
-    FRONTEND_URL = f"https://{PRODUCTION_URL}"
+# Monta o link de callback automaticamente usando o BACKEND_URL
+GOOGLE_REDIRECT_URI = f"{BACKEND_URL}/api/auth/google/callback"
+
+# Define URLs dinâmicas baseadas no ambiente da AWS ou local
+if "3.21.52.233" in BACKEND_URL:
+    GOOGLE_REDIRECT_URI = f"{BACKEND_URL}/api/auth/google/callback"
 else:
     GOOGLE_REDIRECT_URI = "http://127.0.0.1:8000/api/auth/google/callback"
     FRONTEND_URL = "http://127.0.0.1:5500"
