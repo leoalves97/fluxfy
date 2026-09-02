@@ -29,18 +29,18 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
 # --- CONFIGURAÇÕES DE AMBIENTE ---
-BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://127.0.0.1:5500")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://3.21.52.233.nip.io:8000")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://fluxfy-one.vercel.app")
 
-# Monta o link de callback automaticamente usando o BACKEND_URL
+# Garante que a porta 8000 e o nip.io estejam presentes se for o IP de produção
+if "3.21.52.233" in BACKEND_URL:
+    if "nip.io" not in BACKEND_URL:
+        BACKEND_URL = "http://3.21.52.233.nip.io:8000"
+    elif ":8000" not in BACKEND_URL:
+        BACKEND_URL = BACKEND_URL.rstrip("/") + ":8000"
+
 GOOGLE_REDIRECT_URI = f"{BACKEND_URL}/api/auth/google/callback"
 
-# Define URLs dinâmicas baseadas no ambiente da AWS ou local
-if "3.21.52.233" in BACKEND_URL:
-    GOOGLE_REDIRECT_URI = f"{BACKEND_URL}/api/auth/google/callback"
-else:
-    GOOGLE_REDIRECT_URI = "http://127.0.0.1:8000/api/auth/google/callback"
-    FRONTEND_URL = "http://127.0.0.1:5500"
 
 # Libera o CORS
 app.add_middleware(
