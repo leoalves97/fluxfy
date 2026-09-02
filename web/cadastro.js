@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const top = (screen.height - altura) / 2;
 
             window.open(
-                'http://3.21.52.233:8000/api/auth/google/login',
+                'http://3.21.52.233.nip.io:8000/api/auth/google/login',
                 'GoogleAuthWindow',
                 `width=${largura},height=${altura},top=${top},left=${left}`
             );
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             feedback.classList.add('hidden');
 
             try {
-                const response = await fetch('http://3.21.52.233:8000/api/cadastro', {
+                const response = await fetch('http://3.21.52.233.nip.io:8000/api/cadastro', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome: nome, email: email, password: password })
