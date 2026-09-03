@@ -6,7 +6,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Verificação de Segurança (Proteger a Rota)
-    // Se não houver token no LocalStorage, chuta o usuário de volta para o login.
     const token = localStorage.getItem('tokenCantina');
     if (!token) {
         window.location.href = 'index.html';
@@ -34,20 +33,17 @@ async function carregarUsuariosPendentes() {
     const contador = document.getElementById('contadorPendentes');
 
     try {
-        // Faz a requisição para o Back-end
-        const response = await fetch('http://3.21.52.233.nip.io:8000/api/usuarios/pendentes');
+        // Faz a requisição para o Back-end usando a rota sem porta explícita
+        const response = await fetch('http://3.21.52.233.nip.io/api/usuarios/pendentes');
 
-        // Valida se a requisição deu erro (caso servidor desligado por exemplo
         if (!response.ok) {
             throw new Error('Falha ao buscar os dados na API');
         }
 
-        // Converte a resposta para um array de objetos JavaScript
         const usuariosReais = await response.json();
 
         tabela.innerHTML = '';
 
-        //Se o array vier vazio, mostra mensagem e zera o contador
         if (usuariosReais.length === 0) {
             contador.textContent = '0';
             tabela.innerHTML = `
@@ -59,15 +55,12 @@ async function carregarUsuariosPendentes() {
             return;
         }
 
-        // Atualiza o número de pendentes no card do apinel
         contador.textContent = usuariosReais.length;
 
-        // Percorre cada usuário que veio do banco de dados e cria a linha
         usuariosReais.forEach(user => {
             const tr = document.createElement('tr');
             tr.className = "hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors";
 
-            // Tratativa caso a coluna de data ainda não exista
             const dataExibicao = user.data_criacao ? new Date(user.data_criacao).toLocaleDateString('pt-BR') : '-';
 
             tr.innerHTML = `
@@ -98,10 +91,8 @@ async function carregarUsuariosPendentes() {
     }
 }
 
-// Funções de ação (Devem fazer chamadas PUT/DELETE para a API posteriormente)
 window.aprovarUsuario = function (id) {
     alert(`Usuário ID ${id} aprovado com sucesso! (Integração pendente)`);
-    // Após aprovar, chama carregarUsuariosPendentes() novamente para atualizar a tabela
 };
 
 window.rejeitarUsuario = function (id) {

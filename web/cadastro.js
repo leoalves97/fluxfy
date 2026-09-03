@@ -12,8 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnGoogle = document.getElementById('btnGoogle');
 
     // --- LÓGICA DO POPUP DO GOOGLE AUTH ---
-
-    //  A tela principal de cadastro fica escutando as mensagens do Pop-up
     window.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'GOOGLE_AUTH_RESULT') {
             if (event.data.status === 'pendente') {
@@ -33,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Captura o clique no botão de cadastro para abrir o Pop-up
     if (btnGoogle) {
         btnGoogle.addEventListener('click', () => {
             const largura = 500;
@@ -41,8 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const left = (screen.width - largura) / 2;
             const top = (screen.height - altura) / 2;
 
+            // URL atualizada da API
             window.open(
-                'http://3.21.52.233.nip.io:8000/api/auth/google/login',
+                'http://3.21.52.233.nip.io/api/auth/google/login',
                 'GoogleAuthWindow',
                 `width=${largura},height=${altura},top=${top},left=${left}`
             );
@@ -87,7 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
             feedback.classList.add('hidden');
 
             try {
-                const response = await fetch('http://3.21.52.233.nip.io:8000/api/cadastro', {
+                // URL atualizada da API
+                const response = await fetch('http://3.21.52.233.nip.io/api/cadastro', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome: nome, email: email, password: password })

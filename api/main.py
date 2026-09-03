@@ -11,7 +11,6 @@ from api.chatbot import router as chatbot_router
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Função para criar uma sessão de banco de dados por requisição
 def get_db():
     db = SessionLocal()
     try:
@@ -19,7 +18,6 @@ def get_db():
     finally:
         db.close()
 
-# Recria as tabelas no Supabase
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Fluxfy API")
@@ -28,32 +26,27 @@ app = FastAPI(title="Fluxfy API")
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
-# --- CONFIGURAÇÕES DE AMBIENTE ---
-BACKEND_URL = os.getenv("BACKEND_URL", "http://3.21.52.233.nip.io:8000")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "https://fluxfy-one.vercel.app")
-
-# Garante que a porta 8000 e o nip.io estejam presentes se for o IP de produção
-if "3.21.52.233" in BACKEND_URL:
-    if "nip.io" not in BACKEND_URL:
-        BACKEND_URL = "http://3.21.52.233.nip.io:8000"
-    elif ":8000" not in BACKEND_URL:
-        BACKEND_URL = BACKEND_URL.rstrip("/") + ":8000"
+# Configurações de ambiente (agora usando HTTPS por padrão para produção)
+BACKEND_URL = os.getenv("BACKEND_URL", "https://3.21.52.233.nip.io").rstrip("/")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://fluxfy-one.vercel.app").rstrip("/")
 
 GOOGLE_REDIRECT_URI = f"{BACKEND_URL}/api/auth/google/callback"
 
-
-# Libera o CORS
+# Libera CORS de forma ampla para o frontend no Vercel
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://fluxfy-one.vercel.app",
+        "http://fluxfy-one.vercel.app",
         "http://127.0.0.1:5500",
-        "http://localhost:5500"
-    ], 
+        "http://localhost:5500",
+        "*"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 app.include_router(chatbot_router)
 
 class UsuarioCreate(BaseModel):
@@ -114,7 +107,7 @@ def google_login():
     url = (
         f"https://accounts.google.com/o/oauth2/v2/auth?"
         f"response_type=code&"
-        f"client_id={os.getenv('GOOGLE_CLIENT_ID')}&"
+        f"client_id={GOOGLE_CLIENT_ID}&"
         f"redirect_uri={GOOGLE_REDIRECT_URI}&"
         f"scope=openid%20profile%20email&"
         f"access_type=offline"
@@ -126,8 +119,8 @@ async def google_callback(code: str, db = Depends(get_db)):
     token_url = "https://oauth2.googleapis.com/token"
     dados_token = {
         "code": code,
-        "client_id": os.getenv("GOOGLE_CLIENT_ID"),
-        "client_secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+        "client_id": GOOGLE_CLIENT_ID,
+        "client_secret": GOOGLE_CLIENT_SECRET,
         "redirect_uri": GOOGLE_REDIRECT_URI,
         "grant_type": "authorization_code",
     }
@@ -150,7 +143,7 @@ async def google_callback(code: str, db = Depends(get_db)):
     usuario_existente = db.query(models.Usuario).filter(models.Usuario.email == email_google).first()
 
     if usuario_existente:
-        url_retorno = f"{FRONTEND_URL}/web/index.html?auth_status=sucesso&email={email_google}"
+        url_retorno = f"{FRONTEND_URL}/index.html?auth_status=sucesso&email={email_google}"
         return RedirectResponse(url=url_retorno)
     else:
         senha_aleatoria = pwd_context.hash(f"google_{email_google}_{os.urandom(16)}")
@@ -165,5 +158,5 @@ async def google_callback(code: str, db = Depends(get_db)):
         db.add(novo_usuario)
         db.commit()
         
-        url_retorno = f"{FRONTEND_URL}/web/index.html?auth_status=pendente"
+        url_retorno = f"{FRONTEND_URL}/index.html?auth_status=pendente"
         return RedirectResponse(url=url_retorno)
