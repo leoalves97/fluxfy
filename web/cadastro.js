@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // URL atualizada da API
             window.open(
-                'http://3.21.52.233.nip.io/api/auth/google/login',
+                'http://3.21.52.233.nip.io:8000/api/login',
                 'GoogleAuthWindow',
                 `width=${largura},height=${altura},top=${top},left=${left}`
             );
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // URL atualizada da API
-                const response = await fetch('http://3.21.52.233.nip.io/api/cadastro', {
+                const response = await fetch('http://3.21.52.233.nip.io:8000/api/cadastro', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome: nome, email: email, password: password })

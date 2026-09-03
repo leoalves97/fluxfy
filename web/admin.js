@@ -34,7 +34,7 @@ async function carregarUsuariosPendentes() {
 
     try {
         // Faz a requisição para o Back-end usando a rota sem porta explícita
-        const response = await fetch('http://3.21.52.233.nip.io/api/usuarios/pendentes');
+        const response = await fetch('http://3.21.52.233.nip.io:8000/api/usuarios/pendentes');
 
         if (!response.ok) {
             throw new Error('Falha ao buscar os dados na API');
