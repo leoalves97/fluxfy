@@ -3,3 +3,5 @@ env/
 
 # Ignorar variáveis de ambiente 
 .env
+
+/comandos.txt

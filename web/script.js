@@ -13,22 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const authStatus = params.get('auth_status');
 
     if (authStatus) {
-        // Verifica se essa tela foi aberta por outra (ou seja, se é um pop-up)
         if (window.opener) {
-            // Envia os dados para a tela principal
             window.opener.postMessage({
                 type: 'GOOGLE_AUTH_RESULT',
                 status: authStatus,
                 email: params.get('email')
             }, '*');
 
-            // Fecha o pop-up
             window.close();
-            return; // Para a execução do script aqui dentro do pop-up
+            return;
         }
     }
 
-    // A tela principal fica escutando as mensagens que chegam do Pop-up
     window.addEventListener('message', (event) => {
         if (event.data && event.data.type === 'GOOGLE_AUTH_RESULT') {
             if (event.data.status === 'pendente') {
@@ -48,18 +44,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Captura o clique no botão para abrir o Pop-up
     const btnGoogle = document.getElementById('btnGoogle');
     if (btnGoogle) {
         btnGoogle.addEventListener('click', () => {
-            // Configurações para abrir a janela centralizada
             const largura = 500;
             const altura = 600;
             const left = (screen.width - largura) / 2;
             const top = (screen.height - altura) / 2;
 
+            // URL atualizada da API sem a porta 8000 explícita
             window.open(
-                'http://3.21.52.233.nip.io:8000/api/auth/google/login',
+                'http://3.21.52.233.nip.io/api/auth/google/login',
                 'GoogleAuthWindow',
                 `width=${largura},height=${altura},top=${top},left=${left}`
             );
@@ -98,7 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
             feedback.classList.add('hidden');
 
             try {
-                const response = await fetch('http://3.21.52.233.nip.io:8000/api/login', {
+                // URL atualizada da API
+                const response = await fetch('http://3.21.52.233.nip.io/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email, password: password })
