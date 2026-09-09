@@ -27,13 +27,7 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "https://fluxfy-one.vercel.app").rstrip
 # Libera CORS de forma ampla para o frontend no Vercel
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://fluxfy-one.vercel.app",
-        "http://fluxfy-one.vercel.app",
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        "*"
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
