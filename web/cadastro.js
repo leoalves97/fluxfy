@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirmPassword');
-    const btnGoogle = document.getElementById('btnGoogle');
 
     // --- LÓGICA DO POPUP DO GOOGLE AUTH ---
     window.addEventListener('message', (event) => {
@@ -30,22 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
-    if (btnGoogle) {
-        btnGoogle.addEventListener('click', () => {
-            const largura = 500;
-            const altura = 600;
-            const left = (screen.width - largura) / 2;
-            const top = (screen.height - altura) / 2;
-
-            // URL atualizada da API
-            window.open(
-                'https://3.21.52.233.nip.io/api/login',
-                'GoogleAuthWindow',
-                `width=${largura},height=${altura},top=${top},left=${left}`
-            );
-        });
-    }
 
     if (emailInput) {
         emailInput.addEventListener('input', function () {
