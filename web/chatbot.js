@@ -7,7 +7,7 @@
  * logo abaixo dos outros <script> do <head>.
  */
 
-const CHATBOT_API_URL = "http://127.0.0.1:8000/api/chatbot";
+const CHATBOT_API_URL = "https://3.21.52.233.nip.io";
 
 document.addEventListener("DOMContentLoaded", () => {
     injectChatbotUI();
