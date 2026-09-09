@@ -1,13 +1,8 @@
-/* 
- * style.css
- * Arquivo reservado para as regras de estilo personalizadas.
- */
-
 /* ==============================================================
    ESTILOS GERAIS
 ============================================================== */
 body {
-    margin: 0; 
+    margin: 0;
 }
 
 /* Ocultar barra de rolagem mantendo o scroll ativo */
