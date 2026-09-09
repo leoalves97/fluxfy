@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from passlib.context import CryptContext
+from sqlalchemy import Column, Integer, String, Numeric, DateTime
 from api.database import engine, SessionLocal
 from api import models
 from api.chatbot import router as chatbot_router
@@ -24,7 +25,7 @@ app = FastAPI(title="Fluxfy API")
 # Configurações de ambiente
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://fluxfy-one.vercel.app").rstrip("/")
 
-# Libera CORS de forma ampla para o frontend no Vercel
+# Libera CORS de forma ampla para o frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,6 +36,7 @@ app.add_middleware(
 
 app.include_router(chatbot_router)
 
+# --- MODELOS E ROTAS DE USUÁRIOS E AUTENTICAÇÃO ---
 class UsuarioCreate(BaseModel):
     nome: str
     email: str
@@ -45,9 +47,7 @@ def cadastrar_usuario(usuario: UsuarioCreate, db = Depends(get_db)):
     usuario_existente = db.query(models.Usuario).filter(models.Usuario.email == usuario.email).first()
     if usuario_existente:
         raise HTTPException(status_code=409, detail="Este e-mail já possui uma solicitação.")
-
     senha_segura = pwd_context.hash(usuario.password)
-
     novo_usuario = models.Usuario(
         nome=usuario.nome,
         email=usuario.email,
@@ -56,11 +56,9 @@ def cadastrar_usuario(usuario: UsuarioCreate, db = Depends(get_db)):
         aprovado=False,
         data_criacao=datetime.utcnow()
     )
-
     db.add(novo_usuario)
     db.commit()
     db.refresh(novo_usuario)
-
     return {"status": "sucesso", "mensagem": "Solicitação enviada para análise."}
 
 class UsuarioLogin(BaseModel):
@@ -70,18 +68,18 @@ class UsuarioLogin(BaseModel):
 @app.post("/api/login")
 def login(usuario: UsuarioLogin, db = Depends(get_db)):
     db_user = db.query(models.Usuario).filter(models.Usuario.email == usuario.email).first()
-    
+         
     if not db_user:
         raise HTTPException(status_code=404, detail="Cadastro não localizado")
-    
+         
     senha_valida = pwd_context.verify(usuario.password, db_user.senha_hash)
-    
+         
     if not senha_valida:
         raise HTTPException(status_code=401, detail="E-mail e senha não conferem")
-    
+         
     if not db_user.aprovado:
         raise HTTPException(status_code=403, detail="Acesso negado")
-    
+         
     return {"token": "token_super_secreto_123"}
 
 @app.get("/api/usuarios")
@@ -91,13 +89,13 @@ def listar_usuarios(filtro: str = "todos", db = Depends(get_db)):
         query = query.filter(models.Usuario.aprovado == False)
     elif filtro == "aprovados":
         query = query.filter(models.Usuario.aprovado == True)
-    
+         
     usuarios = query.all()
-    
+         
     total = db.query(models.Usuario).count()
     pendentes = db.query(models.Usuario).filter(models.Usuario.aprovado == False).count()
     aprovados = db.query(models.Usuario).filter(models.Usuario.aprovado == True).count()
-    
+         
     return {
         "estatisticas": {
             "total": total,
@@ -133,3 +131,48 @@ def excluir_usuario(usuario_id: int, db = Depends(get_db)):
     db.delete(user)
     db.commit()
     return {"mensagem": "Usuário excluído/recusado com sucesso"}
+
+
+# --- MODELO E ROTAS DE PRODUTOS (ESTOQUE) ---
+class Produto(models.Base):
+    __tablename__ = "produtos"
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, nullable=False)
+    categoria = Column(String, nullable=False)
+    qtd = Column(Integer, default=0)
+    preco = Column(Numeric(10, 2), default=0.00)
+    data_criacao = Column(DateTime, default=datetime.utcnow)
+
+class ProdutoCreate(BaseModel):
+    nome: str
+    categoria: str
+    qtd: int
+    preco: float
+
+@app.get("/api/produtos")
+def listar_produtos(db = Depends(get_db)):
+    produtos = db.query(Produto).all()
+    return produtos
+
+@app.post("/api/produtos")
+def criar_produto(produto: ProdutoCreate, db = Depends(get_db)):
+    novo_produto = Produto(
+        nome=produto.nome,
+        categoria=produto.categoria,
+        qtd=produto.qtd,
+        preco=produto.preco,
+        data_criacao=datetime.utcnow()
+    )
+    db.add(novo_produto)
+    db.commit()
+    db.refresh(novo_produto)
+    return {"mensagem": "Produto cadastrado com sucesso", "id": novo_produto.id}
+
+@app.delete("/api/produtos/{produto_id}")
+def excluir_produto(produto_id: int, db = Depends(get_db)):
+    prod = db.query(Produto).filter(Produto.id == produto_id).first()
+    if not prod:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    db.delete(prod)
+    db.commit()
+    return {"mensagem": "Produto excluído com sucesso"}
