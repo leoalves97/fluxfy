@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirmPassword');
-    const btnGoogle = document.getElementById('btnGoogle');
 
     // --- LÓGICA DO POPUP DO GOOGLE AUTH ---
     window.addEventListener('message', (event) => {
@@ -30,22 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
-    if (btnGoogle) {
-        btnGoogle.addEventListener('click', () => {
-            const largura = 500;
-            const altura = 600;
-            const left = (screen.width - largura) / 2;
-            const top = (screen.height - altura) / 2;
-
-            // URL atualizada da API
-            window.open(
-                'http://3.21.52.233.nip.io:8000/api/login',
-                'GoogleAuthWindow',
-                `width=${largura},height=${altura},top=${top},left=${left}`
-            );
-        });
-    }
 
     if (emailInput) {
         emailInput.addEventListener('input', function () {
@@ -86,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // URL atualizada da API
-                const response = await fetch('http://3.21.52.233.nip.io:8000/api/cadastro', {
+                const response = await fetch('https://3.21.52.233.nip.io/api/cadastro', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome: nome, email: email, password: password })

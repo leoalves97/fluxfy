@@ -1,13 +1,12 @@
 import os
-import httpx
 from fastapi import FastAPI, HTTPException, Depends
-from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from api.database import engine, SessionLocal
 from api import models
 from api.chatbot import router as chatbot_router
+from datetime import datetime
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -22,26 +21,13 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Fluxfy API")
 
-# --- CONFIGURAÇÕES DO GOOGLE E AMBIENTE ---
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-
-# Configurações de ambiente (agora usando HTTPS por padrão para produção)
-BACKEND_URL = os.getenv("BACKEND_URL", "https://3.21.52.233.nip.io").rstrip("/")
+# Configurações de ambiente
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://fluxfy-one.vercel.app").rstrip("/")
-
-GOOGLE_REDIRECT_URI = f"{BACKEND_URL}/api/auth/google/callback"
 
 # Libera CORS de forma ampla para o frontend no Vercel
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://fluxfy-one.vercel.app",
-        "http://fluxfy-one.vercel.app",
-        "http://127.0.0.1:5500",
-        "http://localhost:5500",
-        "*"
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -67,7 +53,8 @@ def cadastrar_usuario(usuario: UsuarioCreate, db = Depends(get_db)):
         email=usuario.email,
         senha_hash=senha_segura,
         papel="user",
-        aprovado=False
+        aprovado=False,
+        data_criacao=datetime.utcnow()
     )
 
     db.add(novo_usuario)
@@ -97,66 +84,52 @@ def login(usuario: UsuarioLogin, db = Depends(get_db)):
     
     return {"token": "token_super_secreto_123"}
 
-@app.get("/api/usuarios/pendentes")
-def listar_pendentes(db = Depends(get_db)):
-    usuarios_pendentes = db.query(models.Usuario).filter(models.Usuario.aprovado == False).all()
-    return usuarios_pendentes
-
-@app.get("/api/auth/google/login")
-def google_login():
-    url = (
-        f"https://accounts.google.com/o/oauth2/v2/auth?"
-        f"response_type=code&"
-        f"client_id={GOOGLE_CLIENT_ID}&"
-        f"redirect_uri={GOOGLE_REDIRECT_URI}&"
-        f"scope=openid%20profile%20email&"
-        f"access_type=offline"
-    )
-    return RedirectResponse(url)
-
-@app.get("/api/auth/google/callback")
-async def google_callback(code: str, db = Depends(get_db)):
-    token_url = "https://oauth2.googleapis.com/token"
-    dados_token = {
-        "code": code,
-        "client_id": GOOGLE_CLIENT_ID,
-        "client_secret": GOOGLE_CLIENT_SECRET,
-        "redirect_uri": GOOGLE_REDIRECT_URI,
-        "grant_type": "authorization_code",
-    }
+@app.get("/api/usuarios")
+def listar_usuarios(filtro: str = "todos", db = Depends(get_db)):
+    query = db.query(models.Usuario)
+    if filtro == "pendentes":
+        query = query.filter(models.Usuario.aprovado == False)
+    elif filtro == "aprovados":
+        query = query.filter(models.Usuario.aprovado == True)
     
-    async with httpx.AsyncClient() as client:
-        resposta_token = await client.post(token_url, data=dados_token)
-        access_token = resposta_token.json().get("access_token")
-        
-        if not access_token:
-            raise HTTPException(status_code=400, detail="Falha ao autenticar com o Google")
+    usuarios = query.all()
+    
+    total = db.query(models.Usuario).count()
+    pendentes = db.query(models.Usuario).filter(models.Usuario.aprovado == False).count()
+    aprovados = db.query(models.Usuario).filter(models.Usuario.aprovado == True).count()
+    
+    return {
+        "estatisticas": {
+            "total": total,
+            "pendentes": pendentes,
+            "aprovados": aprovados
+        },
+        "usuarios": usuarios
+    }
 
-        user_info_url = "https://www.googleapis.com/oauth2/v1/userinfo"
-        headers = {"Authorization": f"Bearer {access_token}"}
-        resposta_usuario = await client.get(user_info_url, headers=headers)
-        dados_usuario = resposta_usuario.json()
+@app.patch("/api/usuarios/{usuario_id}/aprovar")
+def aprovar_usuario(usuario_id: int, db = Depends(get_db)):
+    user = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    user.aprovado = True
+    db.commit()
+    return {"mensagem": "Usuário aprovado com sucesso"}
 
-    email_google = dados_usuario.get("email")
-    nome_google = dados_usuario.get("name")
+@app.patch("/api/usuarios/{usuario_id}/admin")
+def alternar_admin(usuario_id: int, db = Depends(get_db)):
+    user = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    user.papel = "admin" if user.papel != "admin" else "user"
+    db.commit()
+    return {"mensagem": f"Papel do usuário alterado para {user.papel}"}
 
-    usuario_existente = db.query(models.Usuario).filter(models.Usuario.email == email_google).first()
-
-    if usuario_existente:
-        url_retorno = f"{FRONTEND_URL}/index.html?auth_status=sucesso&email={email_google}"
-        return RedirectResponse(url=url_retorno)
-    else:
-        senha_aleatoria = pwd_context.hash(f"google_{email_google}_{os.urandom(16)}")
-        
-        novo_usuario = models.Usuario(
-            nome=nome_google,
-            email=email_google,
-            senha_hash=senha_aleatoria,
-            papel="user",
-            aprovado=False
-        )
-        db.add(novo_usuario)
-        db.commit()
-        
-        url_retorno = f"{FRONTEND_URL}/index.html?auth_status=pendente"
-        return RedirectResponse(url=url_retorno)
+@app.delete("/api/usuarios/{usuario_id}")
+def excluir_usuario(usuario_id: int, db = Depends(get_db)):
+    user = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    db.delete(user)
+    db.commit()
+    return {"mensagem": "Usuário excluído/recusado com sucesso"}

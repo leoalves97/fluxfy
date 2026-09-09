@@ -1,11 +1,10 @@
 /*
  * admin.js
- * Lógica do Painel Administrativo: Busca cadastros pendentes e gerencia aprovações.
+ * Lógica do Painel Administrativo: Busca os usuários pendentes na nova API unificada.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-
-    // 1. Verificação de Segurança (Proteger a Rota)
+    // 1. Verificação de Segurança
     const token = localStorage.getItem('tokenCantina');
     if (!token) {
         window.location.href = 'index.html';
@@ -40,31 +39,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 4. Renderização da Tabela de Usuários Pendentes
+    // 3. Carrega os usuários pendentes
     carregarUsuariosPendentes();
 });
 
-/**
- * Função que busca os usuários pendentes na API
- */
 async function carregarUsuariosPendentes() {
     const tabela = document.getElementById('tabelaUsuarios');
     const contador = document.getElementById('contadorPendentes');
 
     try {
-        // Faz a requisição para o Back-end usando a rota sem porta explícita
-        const response = await fetch('http://3.21.52.233.nip.io:8000/api/usuarios/pendentes');
-
+        // Usa a nova rota filtrando apenas os pendentes
+        const response = await fetch('https://3.21.52.233.nip.io/api/usuarios?filtro=pendentes');
         if (!response.ok) {
             throw new Error('Falha ao buscar os dados na API');
         }
 
-        const usuariosReais = await response.json();
+        const data = await response.json();
+        const usuariosPendentes = data.usuarios;
 
         tabela.innerHTML = '';
+        contador.textContent = data.estatisticas.pendentes;
 
-        if (usuariosReais.length === 0) {
-            contador.textContent = '0';
+        if (usuariosPendentes.length === 0) {
             tabela.innerHTML = `
                 <tr>
                     <td colspan="4" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
@@ -74,29 +70,33 @@ async function carregarUsuariosPendentes() {
             return;
         }
 
-        contador.textContent = usuariosReais.length;
-
-        usuariosReais.forEach(user => {
+        usuariosPendentes.forEach(user => {
             const tr = document.createElement('tr');
             tr.className = "hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors";
 
-            const dataExibicao = user.data_criacao ? new Date(user.data_criacao).toLocaleDateString('pt-BR') : '-';
+            // Formata a data de solicitação corrigida
+            const dataExibicao = user.data_criacao ? new Date(user.data_criacao).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) : '-';
 
             tr.innerHTML = `
                 <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">${user.nome}</td>
                 <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">${user.email}</td>
                 <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">${dataExibicao}</td>
                 <td class="px-6 py-4 text-sm text-right space-x-2">
-                    <button onclick="aprovarUsuario(${user.id})" class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-md hover:bg-green-200 dark:hover:bg-green-900/50 font-medium transition-colors">
+                    <button onclick="aprovarUsuario(${user.id})" class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-md hover:bg-green-200 font-medium transition-colors">
                         Aprovar
                     </button>
-                    <button onclick="rejeitarUsuario(${user.id})" class="inline-flex items-center px-3 py-1.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-md hover:bg-red-200 dark:hover:bg-red-900/50 font-medium transition-colors">
+                    <button onclick="rejeitarUsuario(${user.id})" class="inline-flex items-center px-3 py-1.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-md hover:bg-red-200 font-medium transition-colors">
                         Rejeitar
                     </button>
                 </td>
             `;
             tabela.appendChild(tr);
-
         });
 
     } catch (error) {
@@ -110,12 +110,22 @@ async function carregarUsuariosPendentes() {
     }
 }
 
-window.aprovarUsuario = function (id) {
-    alert(`Usuário ID ${id} aprovado com sucesso! (Integração pendente)`);
+window.aprovarUsuario = async function (id) {
+    try {
+        const res = await fetch(`https://3.21.52.233.nip.io/api/usuarios/${id}/aprovar`, { method: 'PATCH' });
+        if (res.ok) carregarUsuariosPendentes();
+    } catch (err) {
+        alert('Erro ao aprovar usuário');
+    }
 };
 
-window.rejeitarUsuario = function (id) {
+window.rejeitarUsuario = async function (id) {
     if (confirm('Tem certeza que deseja rejeitar esta solicitação?')) {
-        alert(`Usuário ID ${id} rejeitado! (Integração pendente)`);
+        try {
+            const res = await fetch(`https://3.21.52.233.nip.io/api/usuarios/${id}`, { method: 'DELETE' });
+            if (res.ok) carregarUsuariosPendentes();
+        } catch (err) {
+            alert('Erro ao rejeitar usuário');
+        }
     }
 };
