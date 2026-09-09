@@ -12,7 +12,26 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // 2. Lógica de Logout
+    // 2. Lógica do Menu Dropdown do Usuário
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
+
+    if (userMenuBtn && userDropdown) {
+        // Alternar a exibição ao clicar no botão de perfil
+        userMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Impede que o clique se propague para o document
+            userDropdown.classList.toggle('active');
+        });
+
+        // Fechar o dropdown ao clicar em qualquer lugar fora dele
+        document.addEventListener('click', (e) => {
+            if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.remove('active');
+            }
+        });
+    }
+
+    // 3. Lógica de Logout
     const btnLogout = document.getElementById('btnLogout');
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
@@ -21,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Renderização da Tabela de Usuários Pendentes
+    // 4. Renderização da Tabela de Usuários Pendentes
     carregarUsuariosPendentes();
 });
 
