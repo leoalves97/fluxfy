@@ -1,11 +1,56 @@
 /* 
  * style.css
  * Arquivo reservado para as regras de estilo personalizadas.
- * Como o projeto utiliza Tailwind CSS em sua base, este arquivo serve para 
- * customizações específicas elaboradas pela área de UX que ultrapassam as 
- * classes utilitárias ou para a importação de tipografias externas.
  */
 
+/* ==============================================================
+   ESTILOS GERAIS
+============================================================== */
 body {
     margin: 0; 
+}
+
+/* Ocultar barra de rolagem mantendo o scroll ativo */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+}
+
+/* ==============================================================
+   TELA DE AUTENTICAÇÃO (Login / Cadastro)
+============================================================== */
+body.auth-body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+/* ==============================================================
+   TELA DO PAINEL ADMINISTRATIVO (Dashboard)
+============================================================== */
+body.admin-body {
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+}
+
+/* Dropdown Menu do Usuário */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 0.5rem;
+    min-width: 150px;
+    z-index: 50;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-menu.active {
+    display: block;
 }

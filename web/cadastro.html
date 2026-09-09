@@ -25,60 +25,65 @@
     </script>
     
     <link rel="stylesheet" href="style.css">
-    
     <script src="theme.js" defer></script>
     <script src="cadastro.js" defer></script>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 h-screen flex items-center justify-center p-4 transition-colors duration-300">
+<body class="auth-body bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
 
     <!-- Botão Flutuante de Dark Mode -->
-    <button id="theme-toggle" type="button" aria-label="Alternar tema claro e escuro" title="Alternar tema claro e escuro" class="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 transition-colors">
+    <button id="theme-toggle" type="button" aria-label="Alternar tema claro e escuro" title="Alternar tema claro e escuro" class="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 transition-colors z-10">
         <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
         <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
     </button>
 
-    <div class="max-w-md w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transition-colors duration-300 border border-transparent dark:border-gray-700 overflow-y-auto max-h-[95vh]">
+    <!-- Container Principal (Formato Horizontal) -->
+    <div class="max-w-4xl w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col md:flex-row overflow-hidden transition-colors duration-300 border border-transparent dark:border-gray-700 max-h-[95vh]">
         
-        <div class="text-center mb-6">
-            <img src="assets\logo.png" alt="Logo Fluxfy" class="mx-auto h-20 object-contain">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-white mt-4 transition-colors">Solicitação de Acesso</h2>
-            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1 transition-colors">Preencha os dados para aprovação</p>
+        <!-- Lado Esquerdo (Branding e Texto) -->
+        <div class="md:w-5/12 bg-gray-50 dark:bg-gray-700/30 p-8 flex flex-col justify-center items-center border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 transition-colors">
+            <img src="assets\logo.png" alt="Logo Fluxfy" class="mx-auto h-24 object-contain">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-6 transition-colors text-center">Solicitação de Acesso</h2>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mt-3 text-center transition-colors">Preencha os dados ao lado para enviar sua solicitação de acesso para aprovação.</p>
         </div>
 
-        <form id="cadastroForm" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="nome">Nome Completo</label>
-                <input type="text" id="nome" required
-                    class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
-                    placeholder="João da Silva">
-            </div>
+        <!-- Lado Direito (Formulário) -->
+        <div class="md:w-7/12 p-8 overflow-y-auto no-scrollbar">
+            <form id="cadastroForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="nome">Nome Completo</label>
+                    <input type="text" id="nome" required
+                        class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
+                        placeholder="João da Silva">
+                </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="email">E-mail do Operador</label>
-                <input type="email" id="email" required
-                    class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
-                    placeholder="operador@cantina.com">
-            </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="email">E-mail do Operador</label>
+                    <input type="email" id="email" required
+                        class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
+                        placeholder="operador@cantina.com">
+                </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="password">Senha</label>
-                <input type="password" id="password" required minlength="6"
-                    class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
-                    placeholder="Mínimo de 6 caracteres">
-            </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="password">Senha</label>
+                        <input type="password" id="password" required minlength="6"
+                            class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
+                            placeholder="Mínimo de 6 caracteres">
+                    </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="confirmPassword">Confirme a Senha</label>
-                <input type="password" id="confirmPassword" required minlength="6"
-                    class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
-                    placeholder="Digite a senha novamente">
-            </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="confirmPassword">Confirme a Senha</label>
+                        <input type="password" id="confirmPassword" required minlength="6"
+                            class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
+                            placeholder="Digite novamente">
+                    </div>
+                </div>
 
-            <button type="submit" id="btnSubmit"
-                class="w-full flex justify-center py-3 px-4 mt-6 border border-transparent rounded-lg shadow-sm text-sm font-bold text-fluxfy-black bg-fluxfy-yellow hover:bg-fluxfy-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fluxfy-yellow transition-colors">
-                Solicitar Acesso com E-mail
-            </button>
-        </form>
+                <button type="submit" id="btnSubmit"
+                    class="w-full flex justify-center py-3 px-4 mt-6 border border-transparent rounded-lg shadow-sm text-sm font-bold text-fluxfy-black bg-fluxfy-yellow hover:bg-fluxfy-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fluxfy-yellow transition-colors">
+                    Solicitar Acesso com E-mail
+                </button>
+            </form>
 
         <div class="flex items-center my-6">
             <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
@@ -88,10 +93,11 @@
         
         <p id="feedbackMessage" class="mt-4 text-center text-sm hidden"></p>
 
-        <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-            Já possui uma conta aprovada? 
-            <a href="index.html" class="text-fluxfy-dark dark:text-fluxfy-yellow hover:underline font-semibold transition-colors">Voltar para o Login</a>
-        </p>
+            <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                Já possui uma conta aprovada? 
+                <a href="index.html" class="text-fluxfy-dark dark:text-fluxfy-yellow hover:underline font-semibold transition-colors">Voltar para o Login</a>
+            </p>
+        </div>
     </div>
 
 </body>
