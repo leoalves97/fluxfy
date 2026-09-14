@@ -1,6 +1,6 @@
 /*
  * aprovacoes.js
- * Lógica da tela de aprovações: Filtros por cards, listagem e ações em dropdown.
+ * Lógica da tela de aprovações: Filtros por cards, listagem e ações em dropdown expansível.
  */
 
 let filtroAtual = 'todos';
@@ -22,7 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Carrega os dados iniciais
+    // 3. Fechar todos os dropdowns de ação ao clicar fora deles
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.action-dropdown-container')) {
+            document.querySelectorAll('.action-dropdown-menu').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+        }
+    });
+
+    // 4. Carrega os dados iniciais
     carregarUsuarios(filtroAtual);
 });
 
@@ -37,6 +46,24 @@ window.filtrar = function (tipo) {
     if (tipo === 'aprovados') titulo.textContent = 'Usuários Aprovados';
 
     carregarUsuarios(filtroAtual);
+};
+
+// Função global para abrir/fechar o menu de ações específico da linha
+window.toggleAcoesMenu = function (id, event) {
+    event.stopPropagation();
+
+    // Fecha qualquer outro menu aberto
+    document.querySelectorAll('.action-dropdown-menu').forEach(menu => {
+        if (menu.id !== `acoes-menu-${id}`) {
+            menu.classList.add('hidden');
+        }
+    });
+
+    // Alterna o menu atual
+    const menuAtual = document.getElementById(`acoes-menu-${id}`);
+    if (menuAtual) {
+        menuAtual.classList.toggle('hidden');
+    }
 };
 
 // Busca os usuários na API considerando o filtro selecionado
@@ -94,14 +121,33 @@ async function carregarUsuarios(filtro) {
             tr.innerHTML = `
                 <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">${user.nome}</td>
                 <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">${user.email}</td>
-                <td class="px-6 py-4 text-sm">${statusBadge} ${papelBadge}</td>
+                <td class="px-6 py-4 text-sm">
+                    <div class="flex flex-wrap gap-1.5 items-center">
+                        ${statusBadge}
+                        ${papelBadge}
+                    </div>
+                </td>
                 <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">${dataExibicao}</td>
-                <td class="px-6 py-4 text-sm text-right space-x-2">
-                    ${!user.aprovado ? `<button onclick="aprovar(${user.id})" class="px-3 py-1.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-md hover:bg-green-200 font-medium transition-colors">Aprovar</button>` : ''}
-                    <button onclick="alternarAdmin(${user.id})" class="px-3 py-1.5 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 rounded-md hover:bg-purple-200 font-medium transition-colors">
-                        ${user.papel === 'admin' ? 'Remover Admin' : 'Tornar Admin'}
-                    </button>
-                    <button onclick="excluir(${user.id})" class="px-3 py-1.5 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-md hover:bg-red-200 font-medium transition-colors">Excluir</button>
+                <td class="px-6 py-4 text-sm text-right relative">
+                    <!-- Botão de Ações / Dropdown -->
+                    <div class="action-dropdown-container inline-block text-left">
+                        <button onclick="toggleAcoesMenu(${user.id}, event)" class="inline-flex items-center justify-center px-3 py-1.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md font-medium text-sm transition-colors">
+                            Ações 
+                            <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        
+                        <div id="acoes-menu-${user.id}" class="action-dropdown-menu hidden absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700 z-50 divide-y divide-gray-100 dark:divide-gray-700">
+                            <div class="py-1">
+                                ${!user.aprovado ? `<button onclick="aprovar(${user.id})" class="w-full text-left px-4 py-2 text-sm text-green-600 dark:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">Aprovar</button>` : ''}
+                                <button onclick="alternarAdmin(${user.id})" class="w-full text-left px-4 py-2 text-sm text-purple-600 dark:text-purple-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">
+                                    ${user.papel === 'admin' ? 'Remover Admin' : 'Tornar Admin'}
+                                </button>
+                            </div>
+                            <div class="py-1">
+                                <button onclick="excluir(${user.id})" class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center">Excluir</button>
+                            </div>
+                        </div>
+                    </div>
                 </td>
             `;
             tabela.appendChild(tr);
