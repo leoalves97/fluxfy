@@ -32,16 +32,14 @@
     <script src="sidebar-loader.js" defer></script>
     <script src="header-loader.js" defer></script>
 </head>
-<body class="admin-body bg-gray-50 dark:bg-gray-900 transition-colors duration-300 text-gray-800 dark:text-gray-200">
-
+<body class="admin-body bg-gray-50 dark:bg-gray-900 transition-colors duration-300 text-gray-800 dark:text-gray-200 flex h-screen overflow-hidden">
     <!-- Sidebar (Menu Lateral) -->
-    <div id="sidebar-container" class="w-64 flex-shrink-0"></div>
-
+    <div id="sidebar-container" class="flex-shrink-0"></div>
+    
     <!-- Área de Conteúdo Principal -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
         <!-- Header (Topo) -->
         <div id="header-container"></div>
-
         <!-- Conteúdo Rolável -->
         <div class="flex-1 overflow-y-auto p-6 no-scrollbar">
             <!-- Cards de Resumo -->
