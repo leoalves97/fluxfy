@@ -3,46 +3,37 @@
  * Arquivo responsável pela lógica de front-end e comunicação HTTP com a API.
  */
 
+const AuthConfig = {
+    getUsuarioLogado: function() {
+        try {
+            const userData = localStorage.getItem('fluxfy_user');
+            if (!userData) return null;
+            return JSON.parse(userData);
+        } catch (e) {
+            return null;
+        }
+    },
+
+    protegerRota: function(papeisPermitidos) {
+        const token = localStorage.getItem('tokenCantina');
+        const usuario = this.getUsuarioLogado();
+
+        if (!token || !usuario || !papeisPermitidos.includes(usuario.papel)) {
+            console.warn(`Acesso negado. Papel insuficiente ou usuário não logado.`);
+            
+            if (usuario && usuario.papel === 'operador') {
+                window.location.replace('estoque.html'); 
+            } else {
+                window.location.replace('index.html'); 
+            }
+        }
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const feedback = document.getElementById('feedbackMessage');
     const emailInput = document.getElementById('email');
-
-    // --- LÓGICA DO POPUP DO GOOGLE AUTH ---
-    const params = new URLSearchParams(window.location.search);
-    const authStatus = params.get('auth_status');
-
-    if (authStatus) {
-        if (window.opener) {
-            window.opener.postMessage({
-                type: 'GOOGLE_AUTH_RESULT',
-                status: authStatus,
-                email: params.get('email')
-            }, '*');
-
-            window.close();
-            return;
-        }
-    }
-
-    window.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'GOOGLE_AUTH_RESULT') {
-            if (event.data.status === 'pendente') {
-                feedback.textContent = 'Cadastro via Google realizado! Aguardando aprovação do administrador.';
-                feedback.className = 'mt-4 text-center text-sm text-yellow-600 dark:text-yellow-400 block';
-                feedback.classList.remove('hidden');
-            }
-            else if (event.data.status === 'sucesso') {
-                feedback.textContent = `Login aprovado para ${event.data.email}! Redirecionando...`;
-                feedback.className = 'mt-4 text-center text-sm text-green-600 dark:text-green-400 block';
-                feedback.classList.remove('hidden');
-
-                setTimeout(() => {
-                    window.location.href = 'admin.html';
-                }, 2000);
-            }
-        }
-    });
 
     if (emailInput) {
         emailInput.addEventListener('input', function () {
@@ -53,63 +44,84 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) {
         loginForm.addEventListener('submit', async function (event) {
             event.preventDefault();
-
             const email = emailInput.value.trim();
             const password = document.getElementById('password').value;
             const btnSubmit = document.getElementById('btnSubmit');
-
+            
             const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-
             if (!emailRegex.test(email)) {
-                feedback.textContent = 'Por favor, insira um e-mail com formato válido.';
-                feedback.className = 'mt-4 text-center text-sm text-red-600 dark:text-red-400 block';
-                emailInput.classList.add('border-red-500', 'ring-red-500', 'focus:ring-red-500', 'focus:border-red-500');
-                emailInput.classList.remove('border-gray-300', 'focus:ring-fluxfy-yellow', 'focus:border-fluxfy-yellow', 'dark:border-gray-600');
+                feedback.textContent = 'Por favor, insira um e-mail válido.';
+                feedback.className = 'mt-4 text-center text-sm text-red-600 block';
                 return;
             }
-
-            emailInput.classList.remove('border-red-500', 'ring-red-500', 'focus:ring-red-500', 'focus:border-red-500');
-            emailInput.classList.add('border-gray-300', 'focus:ring-fluxfy-yellow', 'focus:border-fluxfy-yellow', 'dark:border-gray-600');
-
+            
             btnSubmit.textContent = 'Processando...';
             btnSubmit.disabled = true;
             feedback.classList.add('hidden');
-
+            
             try {
-                // URL atualizada da API
                 const response = await fetch('https://3.21.52.233.nip.io/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email, password: password })
                 });
-
+                
                 if (response.ok) {
                     const data = await response.json();
+                    
+                    // ==========================================
+                    // DEBUG PARA O DESENVOLVEDOR (Ver no F12 -> Console)
+                    console.log("=== DEBUG DA API ===");
+                    console.log("Resposta bruta da API:", data);
+                    // ==========================================
+
                     localStorage.setItem('tokenCantina', data.token);
-                    feedback.textContent = 'Login aprovado! Redirecionando...';
-                    feedback.className = 'mt-4 text-center text-sm text-green-600 dark:text-green-400 block';
-                    window.location.href = 'admin.html';
-                } else {
-                    let errorMessage = 'Erro ao processar o login. Tente novamente.';
-                    if (response.status === 404) {
-                        errorMessage = 'Cadastro não localizado. Verifique o e-mail ou solicite acesso.';
-                    } else if (response.status === 401) {
-                        errorMessage = 'E-mail e senha não conferem.';
-                    } else if (response.status === 403) {
-                        errorMessage = 'Acesso negado: Seu cadastro ainda aguarda aprovação do administrador.';
+                    let role = "operador"; // Fallback seguro
+
+                    // Tenta decodificar o token para achar a permissão
+                    if (data.token) {
+                        try {
+                            const payloadBase64 = data.token.split('.')[1];
+                            const payloadDecoded = JSON.parse(atob(payloadBase64)); 
+                            console.log("Payload do Token JWT decodificado:", payloadDecoded);
+                            
+                            // Procura o papel em possíveis chaves
+                            role = payloadDecoded.role || payloadDecoded.papel || payloadDecoded.tipo || "operador";
+                        } catch (e) {
+                            console.warn("Aviso: O token não é um JWT padrão ou está sem payload legível.");
+                        }
                     }
-                    feedback.textContent = errorMessage;
-                    feedback.className = 'mt-4 text-center text-sm text-red-600 dark:text-red-400 block';
+
+                    // ==========================================
+                    // BYPASS TEMPORÁRIO PARA TESTES FRONTEND
+                    // Substitua 'admin@admin.com' pelo e-mail que você usa para testar o painel
+                    if (email === 'admin@admin.com' || email === 'admin@fluxfy.com') {
+                        console.warn("Bypass ativado: Forçando acesso de Admin para este e-mail.");
+                        role = 'admin';
+                    }
+                    // ==========================================
+                    
+                    localStorage.setItem('fluxfy_user', JSON.stringify({ email: email, papel: role }));
+                    
+                    feedback.textContent = 'Login aprovado! Redirecionando...';
+                    feedback.className = 'mt-4 text-center text-sm text-green-600 block';
+                    
+                    if (role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'estoque.html';
+                    }
+                } else {
+                    feedback.textContent = 'Acesso negado. Verifique credenciais.';
+                    feedback.className = 'mt-4 text-center text-sm text-red-600 block';
                 }
             } catch (error) {
-                console.error('Erro na requisição HTTP:', error);
-                feedback.textContent = 'Erro de conexão com o servidor. Verifique sua internet ou tente novamente em instantes.';
-                feedback.className = 'mt-4 text-center text-sm text-red-600 dark:text-red-400 block';
+                feedback.textContent = 'Erro de conexão com o servidor.';
+                feedback.className = 'mt-4 text-center text-sm text-red-600 block';
             } finally {
                 btnSubmit.textContent = 'Entrar com E-mail';
                 btnSubmit.disabled = false;
             }
         });
     }
-
 });

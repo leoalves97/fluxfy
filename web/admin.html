@@ -5,29 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fluxfy - Painel Administrativo</title>
     
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/icon/icon.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        fluxfy: {
-                            yellow: '#F5C71A',
-                            dark: '#D4A810',
-                            black: '#111111'
-                        }
-                    }
-                }
-            }
+            theme: { extend: { colors: { fluxfy: { yellow: '#F5C71A', dark: '#D4A810', black: '#111111' } } } }
         }
     </script>
     
     <link rel="stylesheet" href="style.css">
-    <!-- <script src="theme.js" defer></script> -->
+    
+    <!-- Scripts Principais e Blindagem da Rota -->
+    <script src="script.js"></script>
+    <script>
+        // Restringe a tela administrativa APENAS para admins
+        window.onload = function() {
+            if(typeof AuthConfig !== 'undefined') AuthConfig.protegerRota(['admin']);
+        };
+    </script>
+
     <script src="admin.js" defer></script>
     <script src="sidebar-loader.js" defer></script>
     <script src="header-loader.js" defer></script>
@@ -40,6 +38,7 @@
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
         <!-- Header (Topo) -->
         <div id="header-container"></div>
+        
         <!-- Conteúdo Rolável -->
         <div class="flex-1 overflow-y-auto p-6 no-scrollbar">
             <!-- Cards de Resumo -->
