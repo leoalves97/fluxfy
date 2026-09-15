@@ -4,101 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fluxfy - Solicitar Acesso</title>
-    <link rel="icon" type="assents/icon/png" href="assets/icon/icon.png">
+    <link rel="icon" type="image/png" href="assets/icon/icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        fluxfy: {
-                            yellow: '#F5C71A',
-                            dark: '#D4A810',
-                            black: '#111111'
-                        }
-                    }
-                }
-            }
+            theme: { extend: { colors: { fluxfy: { yellow: '#F5C71A', dark: '#D4A810', black: '#111111' } } } }
         }
     </script>
-    
     <link rel="stylesheet" href="style.css">
     <script src="theme.js" defer></script>
     <script src="cadastro.js" defer></script>
 </head>
 <body class="auth-body bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-
-    <!-- Botão Flutuante de Dark Mode -->
-    <button id="theme-toggle" type="button" aria-label="Alternar tema claro e escuro" title="Alternar tema claro e escuro" class="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 transition-colors z-10">
-        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+    <button id="theme-toggle" type="button" aria-label="Alternar tema" title="Alternar tema" class="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5 transition-colors z-10">
+        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+        <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
     </button>
-
-    <!-- Container Principal (Formato Horizontal) -->
-    <div class="max-w-4xl w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col md:flex-row overflow-hidden transition-colors duration-300 border border-transparent dark:border-gray-700 max-h-[95vh]">
+    <div class="max-w-4xl w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col md:flex-row overflow-hidden transition-colors duration-300 max-h-[95vh]">
         
-        <!-- Lado Esquerdo (Branding e Texto) -->
-        <div class="md:w-5/12 bg-gray-50 dark:bg-gray-700/30 p-8 flex flex-col justify-center items-center border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 transition-colors">
-            <img src="assets\logo.png" alt="Logo Fluxfy" class="mx-auto h-24 object-contain">
+        <div class="md:w-5/12 bg-gray-50 dark:bg-gray-700/30 p-8 flex flex-col justify-center items-center border-b md:border-r border-gray-200 dark:border-gray-700 transition-colors">
+            <img src="assets/logo.png" alt="Logo Fluxfy" class="mx-auto h-24 object-contain">
             <h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-6 transition-colors text-center">Solicitação de Acesso</h2>
             <p class="text-gray-500 dark:text-gray-400 text-sm mt-3 text-center transition-colors">Preencha os dados ao lado para enviar sua solicitação de acesso para aprovação.</p>
         </div>
-
-        <!-- Lado Direito (Formulário) -->
+        
         <div class="md:w-7/12 p-8 overflow-y-auto no-scrollbar">
             <form id="cadastroForm" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="nome">Nome Completo</label>
-                    <input type="text" id="nome" required
-                        class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
-                        placeholder="João da Silva">
+                    <input type="text" id="nome" required class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors" placeholder="João da Silva">
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="email">E-mail do Operador</label>
-                    <input type="email" id="email" required
-                        class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
-                        placeholder="operador@cantina.com">
+                    <input type="email" id="email" required class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors" placeholder="operador@cantina.com">
                 </div>
-
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="password">Senha</label>
-                        <input type="password" id="password" required minlength="6"
-                            class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
-                            placeholder="Mínimo de 6 caracteres">
+                        <div class="relative mt-1">
+                            <input type="password" id="password" required minlength="6" class="block w-full px-4 py-2 pr-10 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow outline-none transition-colors" placeholder="Mínimo de 6">
+                            <button type="button" class="toggle-password absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400 hover:text-fluxfy-dark transition-colors" data-target="password" aria-label="Mostrar senha" title="Mostrar senha">
+                                <svg class="h-5 w-5 eye-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <!-- Container da Força da Senha -->
+                        <div id="password-strength-container" class="mt-2 hidden">
+                            <div class="h-1.5 w-full bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                                <div id="password-strength-bar" class="h-full w-0 transition-all duration-300"></div>
+                            </div>
+                            <p id="password-strength-text" class="text-xs mt-1 font-medium"></p>
+                        </div>
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="confirmPassword">Confirme a Senha</label>
-                        <input type="password" id="confirmPassword" required minlength="6"
-                            class="mt-1 block w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors dark:placeholder-gray-400"
-                            placeholder="Digite novamente">
+                        <div class="relative mt-1">
+                            <input type="password" id="confirmPassword" required minlength="6" class="block w-full px-4 py-2 pr-10 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow outline-none transition-colors" placeholder="Repita a senha">
+                            <button type="button" class="toggle-password absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400 hover:text-fluxfy-dark transition-colors" data-target="confirmPassword" aria-label="Mostrar senha" title="Mostrar senha">
+                                <svg class="h-5 w-5 eye-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <!-- Container de Senhas Iguais -->
+                        <p id="password-match-text" class="text-xs mt-2 hidden font-medium"></p>
                     </div>
                 </div>
-
-                <button type="submit" id="btnSubmit"
-                    class="w-full flex justify-center py-3 px-4 mt-6 border border-transparent rounded-lg shadow-sm text-sm font-bold text-fluxfy-black bg-fluxfy-yellow hover:bg-fluxfy-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fluxfy-yellow transition-colors">
+                
+                <button type="submit" id="btnSubmit" class="w-full flex justify-center py-3 px-4 mt-6 border border-transparent rounded-lg shadow-sm text-sm font-bold text-fluxfy-black bg-fluxfy-yellow hover:bg-fluxfy-dark focus:outline-none transition-colors">
                     Solicitar Acesso com E-mail
                 </button>
             </form>
-
-        <div class="flex items-center my-6">
-            <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
-            <span class="flex-shrink-0 mx-4 text-gray-400 dark:text-gray-500 text-sm">ou</span>
-            <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
-        </div>
-        
-        <p id="feedbackMessage" class="mt-4 text-center text-sm hidden"></p>
-
+            
+            <p id="feedbackMessage" class="mt-4 text-center text-sm hidden"></p>
             <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-                Já possui uma conta aprovada? 
-                <a href="index.html" class="text-fluxfy-dark dark:text-fluxfy-yellow hover:underline font-semibold transition-colors">Voltar para o Login</a>
+                Já possui uma conta aprovada? <a href="index.html" class="text-fluxfy-dark dark:text-fluxfy-yellow hover:underline font-semibold transition-colors">Voltar para o Login</a>
             </p>
         </div>
     </div>
-
 </body>
 </html>

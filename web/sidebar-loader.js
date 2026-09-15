@@ -1,8 +1,13 @@
+/*
+ * sidebar-loader.js
+ * Responsável por renderizar o menu lateral dinamicamente com base no papel do usuário.
+ */
 document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("sidebar-container");
     if (!container) return;
 
-    // Garante que pega o usuário logado corretamente, senão assume operador por segurança
+    // A regra de ouro: O Sidebar apenas LÊ o que foi definido no login. 
+    // Nunca deve forçar papéis por conta própria. Fallback seguro é 'operador'.
     const usuarioLogado = typeof AuthConfig !== 'undefined' && AuthConfig.getUsuarioLogado() 
         ? AuthConfig.getUsuarioLogado() 
         : { papel: 'operador' };
@@ -14,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const textHiddenClass = isCollapsed ? "hidden" : "inline";
     const logoClass = isCollapsed ? "h-16 w-auto object-contain max-w-[60px]" : "h-20 w-auto object-contain max-w-[150px]";
 
-    // Ícones SVG reutilizáveis
     const icons = {
         painel: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>',
         usuarios: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>',
@@ -23,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
         config: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>'
     };
 
-    // Definição estrita do menu (O operador NÃO vê configurações, nem perfil, nem aprovações)
     const menuPermissions = {
         admin: [
             { url: 'admin.html', label: 'Painel Geral', svg: icons.painel },
@@ -61,17 +64,14 @@ document.addEventListener("DOMContentLoaded", () => {
         </aside>
     `;
 
-    // Marca o item ativo da página atual com precisão
     const pathSegments = window.location.pathname.split("/");
     const currentPage = pathSegments[pathSegments.length - 1] || "admin.html";
     
-    // Busca e aplica o CSS no item selecionado
     const activeItems = container.querySelectorAll(`[data-page="${currentPage}"]`);
     activeItems.forEach(item => {
         item.className = "flex items-center gap-3 bg-fluxfy-yellow/10 dark:bg-fluxfy-yellow/20 text-fluxfy-dark dark:text-fluxfy-yellow px-3 py-3 rounded-lg font-medium transition-colors";
     });
 
-    // Lógica do botão de recolher/expandir o menu
     const toggleBtn = document.getElementById("sidebarToggleBtn");
     const sidebar = document.getElementById("app-sidebar");
     const logoImg = document.getElementById("sidebarLogoImg");
