@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fluxfy - Gerenciamento de Usuários</title>
     
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/icon/icon.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,38 +12,34 @@
         tailwind.config = {
             darkMode: 'class',
             theme: {
-                extend: {
-                    colors: {
-                        fluxfy: {
-                            yellow: '#F5C71A',
-                            dark: '#D4A810',
-                            black: '#111111'
-                        }
-                    }
-                }
+                extend: { colors: { fluxfy: { yellow: '#F5C71A', dark: '#D4A810', black: '#111111' } } }
             }
         }
     </script>
     
     <link rel="stylesheet" href="style.css">
-    <!-- <script src="theme.js" defer></script> -->
+    
+    <!-- Scripts Principais -->
+    <script src="script.js"></script>
+    <script>
+        // Blindagem Imediata: Apenas Admin acessa esta tela
+        window.onload = function() {
+            if(typeof AuthConfig !== 'undefined') AuthConfig.protegerRota(['admin']);
+        };
+    </script>
+    
     <script src="aprovacoes.js" defer></script>
     <script src="sidebar-loader.js" defer></script>
     <script src="header-loader.js" defer></script>
-
 </head>
 <body class="admin-body bg-gray-50 dark:bg-gray-900 transition-colors duration-300 text-gray-800 dark:text-gray-200 flex h-screen overflow-hidden">
-    <!-- Sidebar (Menu Lateral) -->
+    
     <div id="sidebar-container" class="flex-shrink-0"></div>
     
-    <!-- Área de Conteúdo Principal -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        <!-- Header -->
         <div id="header-container"></div>
-        <!-- Conteúdo Rolável -->
+        
         <div class="flex-1 overflow-y-auto p-6">
-            
-            <!-- Cards de Resumo / Filtros Interativos -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div id="cardFiltroTodos" onclick="filtrar('todos')" class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border-2 border-transparent hover:border-fluxfy-yellow cursor-pointer transition-all">
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total de Usuários</p>
@@ -60,7 +55,6 @@
                 </div>
             </div>
 
-            <!-- Tabela de Usuários -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                     <h2 class="text-lg font-semibold text-gray-800 dark:text-white" id="tituloTabela">Lista de Usuários (Todos)</h2>
@@ -71,8 +65,8 @@
                             <tr class="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-sm">
                                 <th class="px-6 py-3 font-medium">Nome</th>
                                 <th class="px-6 py-3 font-medium">E-mail</th>
-                                <th class="px-6 py-3 font-medium">Status / Papel</th>
-                                <th class="px-6 py-3 font-medium">Data da Solicitação</th>
+                                <th class="px-6 py-3 font-medium">Status</th> <!-- Coluna Separada -->
+                                <th class="px-6 py-3 font-medium">Papel</th>  <!-- Coluna Separada -->
                                 <th class="px-6 py-3 font-medium text-right">Ações</th>
                             </tr>
                         </thead>
@@ -86,7 +80,6 @@
                     </table>
                 </div>
             </div>
-
         </div>
     </main>
 </body>
