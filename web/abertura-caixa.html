@@ -3,80 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fluxfy - Abertura de Caixa</title>
+    <title>Fluxfy - Frente de Caixa (PDV)</title>
     
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/icon/icon.png">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        fluxfy: {
-                            yellow: '#F5C71A',
-                            dark: '#D4A810',
-                            black: '#111111'
-                        }
-                    }
-                }
-            }
+            theme: { extend: { colors: { fluxfy: { yellow: '#F5C71A', dark: '#D4A810', black: '#111111' } } } }
         }
     </script>
-    
     <link rel="stylesheet" href="style.css">
     
-    <!-- Scripts -->
-    <script src="theme.js" defer></script>
+    <!-- Scripts Principais e Blindagem -->
+    <script src="script.js"></script>
+    <script>
+        window.onload = function() {
+            if(typeof AuthConfig !== 'undefined') AuthConfig.protegerRota(['admin', 'operador']);
+        };
+    </script>
+    
     <script src="abertura-caixa.js" defer></script>
+    <script src="sidebar-loader.js" defer></script>
+    <script src="header-loader.js" defer></script>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300">
-
-    <!-- Topo Simples com Botão Dark Mode -->
-    <div class="absolute top-4 right-4 flex items-center gap-4">
-        <button id="theme-toggle" type="button" aria-label="Alternar tema" title="Alternar tema" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 transition-colors">
-            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-        </button>
-        <button id="btnLogout" class="text-sm font-medium text-red-600 dark:text-red-400 hover:underline">Sair</button>
-    </div>
-
-    <!-- Card Principal -->
-    <div class="max-w-md w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 transition-colors duration-300 border border-transparent dark:border-gray-700">
+<body class="admin-body bg-gray-50 dark:bg-gray-900 transition-colors duration-300 text-gray-800 dark:text-gray-200 flex h-screen overflow-hidden">
+    
+    <div id="sidebar-container" class="flex-shrink-0"></div>
+    
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <div id="header-container"></div>
         
-        <div class="text-center mb-6">
-            <img src="assets/logo.png" alt="Logo Fluxfy" class="mx-auto h-20 object-contain">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mt-4">Abertura de Caixa</h2>
-            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Olá, <span id="nomeOperador" class="font-semibold text-fluxfy-dark dark:text-fluxfy-yellow">Operador</span>! Informe o saldo inicial.</p>
-        </div>
-
-        <form id="aberturaForm" class="space-y-6">
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 no-scrollbar relative flex flex-col">
             
-            <!-- Campo de Valor Inicial -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" for="valorInicial">Fundo de Troco (R$)</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span class="text-gray-500 dark:text-gray-400 font-medium">R$</span>
+            <!-- ESTADO 1: ABERTURA DO CAIXA -->
+            <div id="estado-abertura" class="hidden flex-1 items-center justify-center transition-all duration-500">
+                <div class="max-w-md w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-100 dark:border-gray-700">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-fluxfy-yellow/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-fluxfy-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Abertura de Caixa</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Informe o fundo de troco inicial para começar o turno de hoje.</p>
                     </div>
-                    <input type="number" id="valorInicial" required min="0" step="0.01"
-                        class="block w-full pl-10 pr-4 py-3 text-lg font-bold bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow focus:border-fluxfy-yellow outline-none transition-colors"
-                        placeholder="0,00" value="0.00">
+                    <form id="formAbertura" class="space-y-6">
+                        <div>
+                            <label for="valorInicial" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Fundo de Troco (R$)</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 dark:text-gray-400 font-medium">R$</span>
+                                </div>
+                                <input type="number" id="valorInicial" required min="0" step="0.01" value="0.00" class="block w-full pl-10 pr-4 py-3 text-lg font-bold bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-fluxfy-yellow outline-none transition-colors">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-4 px-4 rounded-lg shadow-sm font-bold text-fluxfy-black bg-fluxfy-yellow hover:bg-fluxfy-dark transition-colors">
+                            Abrir Caixa e Iniciar Vendas
+                        </button>
+                    </form>
                 </div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Valor físico disponível na gaveta antes das vendas.</p>
             </div>
 
-            <!-- Botão de Confirmação -->
-            <button type="submit" id="btnAbrirCaixa"
-                class="w-full flex justify-center py-4 px-4 border border-transparent rounded-lg shadow-sm text-base font-bold text-fluxfy-black bg-fluxfy-yellow hover:bg-fluxfy-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fluxfy-yellow transition-colors">
-                Confirmar e Abrir PDV
-            </button>
-        </form>
+            <!-- ESTADO 2: CAIXA PAUSADO -->
+            <div id="estado-pausado" class="hidden flex-1 items-center justify-center transition-all duration-500">
+                <div class="max-w-md w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-100 dark:border-gray-700 text-center">
+                    <div class="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Caixa Pausado</h2>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-8">Suas vendas estão suspensas temporariamente para descanso. O caixa não foi fechado.</p>
+                    <button onclick="retomarCaixa()" class="w-full py-4 px-4 rounded-lg shadow-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                        Retomar Vendas
+                    </button>
+                </div>
+            </div>
 
-        <p id="feedbackMessage" class="mt-4 text-center text-sm hidden"></p>
-    </div>
+            <!-- ESTADO 3: CAIXA ENCERRADO -->
+            <div id="estado-encerrado" class="hidden flex-1 items-center justify-center transition-all duration-500">
+                <div class="max-w-md w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-red-100 dark:border-red-900/30 text-center">
+                    <div class="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-10 h-10 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Turno Encerrado</h2>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">O caixa foi fechado definitivamente para o dia de hoje. Não é possível realizar novas vendas.</p>
+                    
+                    <!-- Botão exclusivo para Admin -->
+                    <div id="admin-override-container" class="hidden border-t border-gray-200 dark:border-gray-700 pt-6 mt-2">
+                        <p class="text-xs text-gray-400 mb-3">Acesso Administrativo detectado.</p>
+                        <button onclick="adminForcarReabertura()" class="w-full py-3 px-4 rounded-lg font-bold text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors border border-red-200 dark:border-red-800">
+                            Forçar Reabertura de Caixa
+                        </button>
+                    </div>
+                </div>
+            </div>
 
+            <!-- ESTADO 4: PAINEL DO PDV (ATIVO) -->
+            <div id="estado-pdv" class="hidden flex-1 flex-col lg:flex-row gap-4 md:gap-6 overflow-y-auto lg:overflow-hidden pb-10 lg:pb-0 h-full">
+                
+                <div class="flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden min-h-[500px] lg:min-h-0">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-50 dark:bg-gray-800/50">
+                        <input type="text" id="buscaPdv" placeholder="Buscar produto..." class="w-full sm:max-w-md px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
+                        
+                        <!-- Botões de Controle de Caixa -->
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <button onclick="pausarCaixa()" class="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 rounded-lg transition-colors flex items-center justify-center gap-2" title="Pausar para descanso">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Pausar
+                            </button>
+                            <button onclick="encerrarCaixaDefinitivo()" class="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 rounded-lg transition-colors flex items-center justify-center gap-2" title="Fechar definitivamente">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                Encerrar Dia
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="gradeProdutos" class="flex-1 overflow-y-auto p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 no-scrollbar">
+                        <!-- Renderizado via JS -->
+                    </div>
+                </div>
+
+                <!-- Carrinho -->
+                <div class="w-full lg:w-96 flex-shrink-0 flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden min-h-[450px] lg:min-h-0">
+                    <div class="p-4 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-gray-800 dark:text-white text-lg">Pedido Atual</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Comanda #<span id="numeroComanda">001</span></p>
+                        </div>
+                        <button onclick="limparCarrinho()" class="text-sm text-gray-500 hover:text-red-500 transition-colors font-medium">Limpar</button>
+                    </div>
+                    
+                    <div id="listaCarrinho" class="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar"></div>
+
+                    <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-gray-600 dark:text-gray-300 font-medium">Total:</span>
+                            <span class="text-2xl font-bold text-gray-900 dark:text-white">R$ <span id="totalCarrinho">0,00</span></span>
+                        </div>
+                        
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Forma de Pagamento</p>
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <button onclick="selecionarPagamento('dinheiro')" id="btn-pag-dinheiro" class="btn-pagamento py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 rounded-lg hover:border-fluxfy-yellow hover:bg-fluxfy-yellow/10 transition-colors">Dinheiro</button>
+                            <button onclick="selecionarPagamento('pix')" id="btn-pag-pix" class="btn-pagamento py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 rounded-lg hover:border-fluxfy-yellow hover:bg-fluxfy-yellow/10 transition-colors">PIX</button>
+                            <button onclick="selecionarPagamento('cartao')" id="btn-pag-cartao" class="btn-pagamento py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 rounded-lg hover:border-fluxfy-yellow hover:bg-fluxfy-yellow/10 transition-colors">Cartão</button>
+                        </div>
+                        
+                        <button onclick="finalizarPedido()" id="btnFinalizar" class="w-full py-3 bg-fluxfy-yellow hover:bg-fluxfy-dark text-fluxfy-black font-bold rounded-lg shadow transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Finalizar Pedido
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
 </body>
 </html>
