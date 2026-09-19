@@ -18,15 +18,15 @@ document.addEventListener('DOMContentLoaded', () => {
         formAbertura.addEventListener('submit', (e) => {
             e.preventDefault();
             const valor = parseFloat(document.getElementById('valorInicial').value);
-            
+
             // Salva status, fundo, data local e zera os saldos e o carrinho
             localStorage.setItem('fluxfy_caixa_status', 'aberto');
             localStorage.setItem('fluxfy_caixa_data', obterDataHoje());
             localStorage.setItem('fluxfy_caixa_fundo', valor.toFixed(2));
             localStorage.setItem('fluxfy_saldos', JSON.stringify({ dinheiro: 0, pix: 0, cartao: 0 }));
             localStorage.setItem('fluxfy_carrinho', JSON.stringify([]));
-            
-            if(!localStorage.getItem('fluxfy_comanda_atual')) {
+
+            if (!localStorage.getItem('fluxfy_comanda_atual')) {
                 localStorage.setItem('fluxfy_comanda_atual', '1');
             }
 
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const buscaInput = document.getElementById('buscaPdv');
-    if(buscaInput) {
+    if (buscaInput) {
         buscaInput.addEventListener('input', (e) => {
             renderizarGradeProdutos(e.target.value);
         });
@@ -51,7 +51,7 @@ function verificarEstadoCaixa() {
     // Esconde todas as telas inicialmente para evitar sobreposição
     ['estado-abertura', 'estado-pdv', 'estado-pausado', 'estado-encerrado'].forEach(id => {
         const el = document.getElementById(id);
-        if(el) {
+        if (el) {
             el.classList.add('hidden');
             el.classList.remove('flex');
         }
@@ -63,23 +63,23 @@ function verificarEstadoCaixa() {
         pdv.classList.remove('hidden');
         pdv.classList.add('flex');
         iniciarPDV();
-    } 
+    }
     else if (statusFinal === 'pausado') {
         const pausado = document.getElementById('estado-pausado');
         pausado.classList.remove('hidden');
         pausado.classList.add('flex');
-    } 
+    }
     else if (statusFinal === 'encerrado') {
         const encerrado = document.getElementById('estado-encerrado');
         encerrado.classList.remove('hidden');
         encerrado.classList.add('flex');
-        
+
         // Mostra botão de override se for Admin
         const usuarioLogado = typeof AuthConfig !== 'undefined' ? AuthConfig.getUsuarioLogado() : null;
         if (usuarioLogado && usuarioLogado.papel === 'admin') {
             document.getElementById('admin-override-container').classList.remove('hidden');
         }
-    } 
+    }
     else {
         // null ou vazio = não abriu ainda
         const abertura = document.getElementById('estado-abertura');
@@ -91,40 +91,40 @@ function verificarEstadoCaixa() {
 // ==========================================
 // CONTROLES DE PAUSA E ENCERRAMENTO
 // ==========================================
-window.pausarCaixa = function() {
+window.pausarCaixa = function () {
     localStorage.setItem('fluxfy_caixa_status', 'pausado');
     verificarEstadoCaixa();
 }
 
-window.retomarCaixa = function() {
+window.retomarCaixa = function () {
     localStorage.setItem('fluxfy_caixa_status', 'aberto');
     verificarEstadoCaixa();
 }
 
-window.encerrarCaixaDefinitivo = function() {
+window.encerrarCaixaDefinitivo = function () {
     const saldos = JSON.parse(localStorage.getItem('fluxfy_saldos')) || { dinheiro: 0, pix: 0, cartao: 0 };
     const fundo = parseFloat(localStorage.getItem('fluxfy_caixa_fundo')) || 0;
     const dataAbertura = localStorage.getItem('fluxfy_caixa_data') || obterDataHoje();
-    
+
     const totalGeral = fundo + saldos.dinheiro + saldos.pix + saldos.cartao;
 
     const mensagemResumo = `📊 RESUMO DO CAIXA (${dataAbertura})\n\n` +
-                           `💵 Fundo Inicial: R$ ${fundo.toFixed(2)}\n` +
-                           `💰 Vendas Dinheiro: R$ ${saldos.dinheiro.toFixed(2)}\n` +
-                           `📱 Vendas PIX: R$ ${saldos.pix.toFixed(2)}\n` +
-                           `💳 Vendas Cartão: R$ ${saldos.cartao.toFixed(2)}\n` +
-                           `---------------------------\n` +
-                           `🔴 TOTAL EM CAIXA: R$ ${totalGeral.toFixed(2)}\n\n` +
-                           `ATENÇÃO: Deseja realizar o fechamento definitivo?`;
+        `💵 Fundo Inicial: R$ ${fundo.toFixed(2)}\n` +
+        `💰 Vendas Dinheiro: R$ ${saldos.dinheiro.toFixed(2)}\n` +
+        `📱 Vendas PIX: R$ ${saldos.pix.toFixed(2)}\n` +
+        `💳 Vendas Cartão: R$ ${saldos.cartao.toFixed(2)}\n` +
+        `---------------------------\n` +
+        `🔴 TOTAL EM CAIXA: R$ ${totalGeral.toFixed(2)}\n\n` +
+        `ATENÇÃO: Deseja realizar o fechamento definitivo?`;
 
-    if(confirm(mensagemResumo)) {
+    if (confirm(mensagemResumo)) {
         localStorage.setItem('fluxfy_caixa_status', 'encerrado');
         verificarEstadoCaixa();
     }
 }
 
-window.adminForcarReabertura = function() {
-    if(confirm("ADMINISTRADOR: Reabrir este caixa? O sistema resetará para uma nova abertura de caixa limpa.")) {
+window.adminForcarReabertura = function () {
+    if (confirm("ADMINISTRADOR: Reabrir este caixa? O sistema resetará para uma nova abertura de caixa limpa.")) {
         localStorage.removeItem('fluxfy_caixa_status');
         localStorage.removeItem('fluxfy_caixa_data');
         localStorage.removeItem('fluxfy_saldos');
@@ -138,10 +138,10 @@ window.adminForcarReabertura = function() {
 // ==========================================
 async function iniciarPDV() {
     atualizarNumeroComanda();
-    
+
     const carrinhoSalvo = localStorage.getItem('fluxfy_carrinho');
     if (carrinhoSalvo) carrinho = JSON.parse(carrinhoSalvo);
-    
+
     atualizarCarrinho();
 
     try {
@@ -164,9 +164,9 @@ async function iniciarPDV() {
 function renderizarGradeProdutos(filtro = '') {
     const grade = document.getElementById('gradeProdutos');
     grade.innerHTML = '';
-    
-    const produtosFiltrados = produtosCatalogo.filter(p => 
-        p.nome.toLowerCase().includes(filtro.toLowerCase()) || 
+
+    const produtosFiltrados = produtosCatalogo.filter(p =>
+        p.nome.toLowerCase().includes(filtro.toLowerCase()) ||
         p.categoria.toLowerCase().includes(filtro.toLowerCase())
     );
 
@@ -180,7 +180,7 @@ function renderizarGradeProdutos(filtro = '') {
         const card = document.createElement('div');
         card.className = "bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl p-4 cursor-pointer hover:border-fluxfy-yellow hover:shadow-md transition-all group flex flex-col justify-between";
         card.onclick = () => adicionarAoCarrinho(prod);
-        
+
         card.innerHTML = `
             <div>
                 <span class="text-xs font-semibold text-fluxfy-dark bg-fluxfy-yellow/10 px-2 py-1 rounded mb-2 inline-block">${prod.categoria}</span>
@@ -197,14 +197,14 @@ function renderizarGradeProdutos(filtro = '') {
     });
 }
 
-window.adicionarAoCarrinho = function(produto) {
+window.adicionarAoCarrinho = function (produto) {
     const item = carrinho.find(i => i.id === produto.id);
     if (item) item.quantidade += 1;
     else carrinho.push({ ...produto, quantidade: 1 });
     salvarCarrinho();
 }
 
-window.removerDoCarrinho = function(id) {
+window.removerDoCarrinho = function (id) {
     const index = carrinho.findIndex(i => i.id === id);
     if (index > -1) {
         if (carrinho[index].quantidade > 1) carrinho[index].quantidade -= 1;
@@ -213,8 +213,8 @@ window.removerDoCarrinho = function(id) {
     salvarCarrinho();
 }
 
-window.limparCarrinho = function() {
-    if(carrinho.length > 0 && confirm("Deseja cancelar esta comanda?")) {
+window.limparCarrinho = function () {
+    if (carrinho.length > 0 && confirm("Deseja cancelar esta comanda?")) {
         carrinho = [];
         formaPagamentoSelecionada = null;
         atualizarBotoesPagamento();
@@ -231,7 +231,7 @@ function atualizarCarrinho() {
     const lista = document.getElementById('listaCarrinho');
     const spanTotal = document.getElementById('totalCarrinho');
     const btnFinalizar = document.getElementById('btnFinalizar');
-    
+
     lista.innerHTML = '';
     let total = 0;
 
@@ -250,7 +250,7 @@ function atualizarCarrinho() {
     carrinho.forEach(item => {
         const subtotal = item.preco * item.quantidade;
         total += subtotal;
-        
+
         const div = document.createElement('div');
         div.className = "flex justify-between items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg transition-colors border-b border-gray-100 dark:border-gray-700/50 last:border-0";
         div.innerHTML = `
@@ -272,7 +272,7 @@ function atualizarCarrinho() {
     verificarBotaoFinalizar();
 }
 
-window.selecionarPagamento = function(metodo) {
+window.selecionarPagamento = function (metodo) {
     formaPagamentoSelecionada = metodo;
     atualizarBotoesPagamento();
     verificarBotaoFinalizar();
@@ -295,25 +295,59 @@ function verificarBotaoFinalizar() {
     btn.disabled = !(carrinho.length > 0 && formaPagamentoSelecionada);
 }
 
-window.finalizarPedido = function() {
+window.finalizarPedido = async function () {
     const totalPedido = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
-    
-    // Atualiza os saldos financeiros
-    let saldos = JSON.parse(localStorage.getItem('fluxfy_saldos')) || { dinheiro: 0, pix: 0, cartao: 0 };
-    saldos[formaPagamentoSelecionada] += totalPedido;
-    localStorage.setItem('fluxfy_saldos', JSON.stringify(saldos));
+    const numeroComandaStr = document.getElementById('numeroComanda').textContent;
 
-    alert(`Comanda #${document.getElementById('numeroComanda').textContent} Finalizada!\nValor: R$ ${totalPedido.toFixed(2)}\nForma: ${formaPagamentoSelecionada.toUpperCase()}`);
-    
-    let numAtual = parseInt(localStorage.getItem('fluxfy_comanda_atual')) || 1;
-    localStorage.setItem('fluxfy_comanda_atual', numAtual + 1);
-    
-    carrinho = [];
-    formaPagamentoSelecionada = null;
-    salvarCarrinho();
-    atualizarBotoesPagamento();
-    atualizarNumeroComanda();
-}
+    // Monta o objeto da venda para enviar à API
+    const dadosVenda = {
+        comanda: numeroComandaStr,
+        forma_pagamento: formaPagamentoSelecionada,
+        total: totalPedido,
+        itens: carrinho.map(i => ({
+            id: i.id,
+            nome: i.nome,
+            preco: i.preco,
+            quantidade: i.quantidade
+        }))
+    };
+
+    try {
+        // Envia a venda para o back-end (Supabase/AWS)
+        const response = await fetch('https://3.21.52.233.nip.io/api/vendas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dadosVenda)
+        });
+
+        if (!response.ok) {
+            throw new Error('Erro ao registrar venda no servidor.');
+        }
+
+        const resultado = await response.json();
+        console.log(resultado.mensagem);
+
+        // Atualiza os saldos financeiros locais
+        let saldos = JSON.parse(localStorage.getItem('fluxfy_saldos')) || { dinheiro: 0, pix: 0, cartao: 0 };
+        saldos[formaPagamentoSelecionada] += totalPedido;
+        localStorage.setItem('fluxfy_saldos', JSON.stringify(saldos));
+
+        alert(`Comanda #${numeroComandaStr} Finalizada e Salva no Banco!\nValor: R$ ${totalPedido.toFixed(2)}\nForma: ${formaPagamentoSelecionada.toUpperCase()}`);
+
+        let numAtual = parseInt(localStorage.getItem('fluxfy_comanda_atual')) || 1;
+        localStorage.setItem('fluxfy_comanda_atual', numAtual + 1);
+
+        carrinho = [];
+        formaPagamentoSelecionada = null;
+        salvarCarrinho();
+        atualizarBotoesPagamento();
+        atualizarNumeroComanda();
+
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Atenção: A venda foi finalizada localmente, mas houve uma falha ao registrar no servidor. Verifique sua conexão.');
+    }
+};
 
 function atualizarNumeroComanda() {
     let numAtual = localStorage.getItem('fluxfy_comanda_atual') || '1';
