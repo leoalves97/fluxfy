@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Renderiza itens do menu do usuário com base no papel[cite: 1]
     let dropdownItensHtml = `<li><a href="perfil.html" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Meu Perfil</a></li>`;
     if (usuarioLogado.papel === 'admin') {
-        dropdownItensHtml += `<li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Configurações</a></li>`;
+        dropdownItensHtml += `<li><a href="configuracoes.html" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Configurações</a></li>`;
     }
 
     container.innerHTML = `
