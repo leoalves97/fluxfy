@@ -80,7 +80,7 @@ def login(usuario: UsuarioLogin, db = Depends(get_db)):
     if not db_user.aprovado:
         raise HTTPException(status_code=403, detail="Acesso negado")
          
-    return {"token": "token_super_secreto_123"}
+    return {"token": "token_super_secreto_123", "papel": db_user.papel}
 
 @app.get("/api/usuarios")
 def listar_usuarios(filtro: str = "todos", db = Depends(get_db)):
