@@ -4,11 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 from passlib.context import CryptContext
-from sqlalchemy import Column, Integer, String, Numeric, DateTime
+from sqlalchemy import Column, Integer, String, Numeric, DateTime, func
 from api.database import engine, SessionLocal
 from api import models
 from api.chatbot import router as chatbot_router
-from datetime import datetime
+from datetime import datetime, date
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -228,3 +229,31 @@ def finalizar_venda(venda_dados: VendaCreateSchema, db = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Erro ao processar venda: {str(e)}")
+
+@app.get("/api/vendas/resumo")
+def resumo_vendas(db = Depends(get_db)):
+    try:
+        hoje = date.today()
+        
+        # Soma o total das vendas de hoje
+        vendas_hoje = db.query(func.sum(models.Venda.total))\
+            .filter(func.date(models.Venda.data_criacao) == hoje)\
+            .scalar() or 0.0
+
+        # Soma o total geral de vendas
+        vendas_total = db.query(func.sum(models.Venda.total)).scalar() or 0.0
+
+        # Total de pedidos realizados
+        total_pedidos = db.query(models.Venda).count()
+
+        return {
+            "vendas_hoje": float(vendas_hoje),
+            "vendas_total": float(vendas_total),
+            "total_pedidos": int(total_pedidos)
+        }
+    except Exception as e:
+        return {
+            "vendas_hoje": 0.0,
+            "vendas_total": 0.0,
+            "total_pedidos": 0
+        }

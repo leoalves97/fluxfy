@@ -36,6 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 4. Carrega os usuários pendentes
     carregarUsuariosPendentes();
+
+    // 5. carregar as vendas reais no painel:
+    carregarResumoDashboard();
 });
 
 async function carregarUsuariosPendentes() {
@@ -122,3 +125,18 @@ window.rejeitarUsuario = async function (id) {
         }
     }
 };
+
+async function carregarResumoDashboard() {
+    try {
+        const response = await fetch('https://3.21.52.233.nip.io/api/vendas/resumo');
+        if (response.ok) {
+            const dados = await response.json();
+            const cardVendasHoje = document.getElementById('valorVendasHoje');
+            if (cardVendasHoje) {
+                cardVendasHoje.textContent = `R$ ${dados.vendas_hoje.toFixed(2).replace('.', ',')}`;
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao carregar resumo de vendas:', error);
+    }
+}
