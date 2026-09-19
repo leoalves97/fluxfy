@@ -1,26 +1,21 @@
-/*
- * sidebar-loader.js
- * Menu responsivo: Esconde no mobile, expande no click. Comporta-se normalmente no Desktop.
+/* 
+ * sidebar-loader.js 
+ * Menu responsivo ajustado para separar permissões de Admin e Operador.
  */
 document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("sidebar-container");
     if (!container) return;
 
-    // A regra de ouro: O Sidebar apenas LÊ o que foi definido no login. 
-    // Nunca deve forçar papéis por conta própria. Fallback seguro é 'operador'.
-    const usuarioLogado = typeof AuthConfig !== 'undefined' && AuthConfig.getUsuarioLogado() 
-        ? AuthConfig.getUsuarioLogado() 
+    const usuarioLogado = typeof AuthConfig !== 'undefined' && AuthConfig.getUsuarioLogado()
+        ? AuthConfig.getUsuarioLogado()
         : { papel: 'operador' };
 
-    // ==========================================
-    // LÓGICA DO MENU MOBILE (OVERLAY E SLIDE)
-    // ==========================================
     const overlay = document.createElement('div');
     overlay.id = 'sidebarOverlay';
     overlay.className = 'fixed inset-0 bg-black/50 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity';
     document.body.appendChild(overlay);
 
-    window.toggleMobileMenu = function() {
+    window.toggleMobileMenu = function () {
         const sidebar = document.getElementById("app-sidebar");
         const overlayElement = document.getElementById("sidebarOverlay");
         if (sidebar && overlayElement) {
@@ -35,12 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     overlay.addEventListener('click', toggleMobileMenu);
 
-    // ==========================================
-    // CLASSES DE RESPONSIVIDADE
-    // ==========================================
     const isMobileOrTablet = window.innerWidth < 1024;
     let isCollapsed = !isMobileOrTablet && (localStorage.getItem("sidebar-collapsed") === "true");
-
     const mobileClasses = "fixed inset-y-0 left-0 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0";
     const asideWidth = isCollapsed ? "w-64 lg:w-20" : "w-64";
     const textHiddenClass = isCollapsed ? "inline lg:hidden" : "inline";
@@ -53,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
         caixa: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>'
     };
 
-    // Ícone e URL de configurações removidos da Sidebar
+    // Regra aplicada: Operador vê APENAS Caixa e Estoque. Admin vê tudo.
     const menuPermissions = {
         admin: [
             { url: 'admin.html', label: 'Painel Geral', svg: icons.painel },
@@ -67,9 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
         ]
     };
 
-    const itensPermitidos = menuPermissions[usuarioLogado.papel] || [];
+    const itensPermitidos = menuPermissions[usuarioLogado.papel] || menuPermissions.operador;
     let menuHtml = '';
-
     itensPermitidos.forEach(item => {
         menuHtml += `
             <a href="${item.url}" class="flex items-center gap-3 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-3 rounded-lg font-medium transition-colors" data-page="${item.url}" title="${item.label}">
@@ -97,16 +87,14 @@ document.addEventListener("DOMContentLoaded", () => {
         item.className = "flex items-center gap-3 bg-fluxfy-yellow/10 dark:bg-fluxfy-yellow/20 text-fluxfy-dark dark:text-fluxfy-yellow px-3 py-3 rounded-lg font-medium transition-colors";
     });
 
-    // Toggle para Desktop (Ocultar texto)
     const toggleBtn = document.getElementById("sidebarToggleBtn");
     const sidebar = document.getElementById("app-sidebar");
     const logoImg = document.getElementById("sidebarLogoImg");
     const sidebarTexts = container.querySelectorAll(".sidebar-text");
-
     if (toggleBtn && sidebar && logoImg) {
         toggleBtn.addEventListener("click", () => {
             if (window.innerWidth < 1024) return;
-            
+
             const currentlyCollapsed = sidebar.classList.contains("lg:w-20");
             if (currentlyCollapsed) {
                 sidebar.classList.remove("lg:w-20");
