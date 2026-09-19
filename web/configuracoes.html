@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxfy - Configurações do Sistema</title>
+         
+    <link rel="icon" type="image/png" href="assets/icon/icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { fluxfy: { yellow: '#F5C71A', dark: '#D4A810', black: '#111111' } } } }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+         
+    <!-- Scripts Principais e Blindagem da Rota (Apenas Admin) -->
+    <script src="script.js"></script>
+    <script>
+        window.onload = function() {
+            if(typeof AuthConfig !== 'undefined') AuthConfig.protegerRota(['admin']);
+        };
+    </script>
+         
+    <script src="configuracoes.js" defer></script>
+    <script src="sidebar-loader.js" defer></script>
+    <script src="header-loader.js" defer></script>
+</head>
+<body class="admin-body bg-gray-50 dark:bg-gray-900 transition-colors duration-300 text-gray-800 dark:text-gray-200 flex h-screen overflow-hidden">
+         
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="flex-shrink-0"></div>
+         
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <div id="header-container"></div>
+                 
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 no-scrollbar">
+            <div class="max-w-4xl mx-auto space-y-6">
+                
+                <form id="formConfiguracoes" class="space-y-6">
+                    
+                    <!-- 1. Dados da Empresa -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-fluxfy-dark dark:text-fluxfy-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h5m-5 0V10m0 0V5m0 5h5"></path></svg>
+                            Informações do Estabelecimento
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome Fantasia / Empresa</label>
+                                <input type="text" id="nomeEmpresa" required class="w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">CNPJ / CPF</label>
+                                <input type="text" id="cnpjEmpresa" placeholder="00.000.000/0001-00" class="w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mensagem do Comprovante/Recibo</label>
+                                <input type="text" id="mensagemRecibo" placeholder="Ex: Obrigado pela preferência! Volte sempre." class="w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Regras de Estoque & Alertas -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-fluxfy-dark dark:text-fluxfy-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                            Regras de Estoque
+                        </h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3">
+                                <div>
+                                    <p class="font-medium text-gray-800 dark:text-white">Alerta de Estoque Baixo</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Exibe avisos visuais no painel quando um produto estiver acabando.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="alertaEstoqueAtivo" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-fluxfy-yellow"></div>
+                                </label>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Limite Mínimo para Considerar "Estoque Baixo"</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" id="limiteEstoqueBaixo" min="1" value="5" required class="w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
+                                        <span class="text-sm text-gray-500">unidades</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Parâmetros do Caixa e Sangria -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-fluxfy-dark dark:text-fluxfy-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            Controle de Caixa e Sangria
+                        </h2>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3">
+                                <div>
+                                    <p class="font-medium text-gray-800 dark:text-white">Alerta de Sangria Automática</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Notifica o operador quando o dinheiro em espécie no caixa ultrapassar o limite seguro.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="alertaSangriaAtivo" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-fluxfy-yellow"></div>
+                                </label>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Valor Máximo em Espécie (Limite de Sangria)</label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 font-medium text-sm">R$</span>
+                                        <input type="number" id="valorLimiteSangria" step="0.01" min="0" value="500.00" required class="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botão de Salvar -->
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="px-6 py-3 bg-fluxfy-yellow hover:bg-fluxfy-dark text-fluxfy-black font-bold rounded-lg shadow transition-colors flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            Salvar Configurações
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </main>
+</body>
+</html>
