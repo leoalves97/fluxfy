@@ -2,6 +2,7 @@ import os
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List
 from passlib.context import CryptContext
 from sqlalchemy import Column, Integer, String, Numeric, DateTime
 from api.database import engine, SessionLocal
@@ -176,3 +177,54 @@ def excluir_produto(produto_id: int, db = Depends(get_db)):
     db.delete(prod)
     db.commit()
     return {"mensagem": "Produto excluído com sucesso"}
+
+# --- MODELOS E ROTAS DE VENDAS ---
+class ItemCarrinhoSchema(BaseModel):
+    id: int
+    nome: str
+    preco: float
+    quantidade: int
+
+class VendaCreateSchema(BaseModel):
+    comanda: str
+    forma_pagamento: str
+    total: float
+    itens: List[ItemCarrinhoSchema]
+
+@app.post("/api/vendas")
+def finalizar_venda(venda_dados: VendaCreateSchema, db = Depends(get_db)):
+    try:
+        # 1. Cria o registro principal da venda
+        nova_venda = models.Venda(
+            comanda=venda_dados.comanda,
+            forma_pagamento=venda_dados.forma_pagamento,
+            total=venda_dados.total,
+            data_criacao=datetime.utcnow()
+        )
+        db.add(nova_venda)
+        db.commit()
+        db.refresh(nova_venda)
+
+        # 2. Registra os itens e desconta do estoque
+        for item in venda_dados.itens:
+            # Salva o item na tabela de itens da venda
+            novo_item = models.ItemVenda(
+                venda_id=nova_venda.id,
+                produto_id=item.id,
+                nome_produto=item.nome,
+                quantidade=item.quantidade,
+                preco_unitario=item.preco
+            )
+            db.add(novo_item)
+
+            # Dá baixa automática no estoque do produto
+            produto_db = db.query(Produto).filter(Produto.id == item.id).first()
+            if produto_db:
+                produto_db.qtd = max(0, produto_db.qtd - item.quantidade)
+
+        db.commit()
+        return {"status": "sucesso", "mensagem": "Venda registrada e estoque atualizado com sucesso!", "venda_id": nova_venda.id}
+    
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Erro ao processar venda: {str(e)}")
