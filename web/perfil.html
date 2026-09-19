@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxfy - Meu Perfil</title>
+         
+    <link rel="icon" type="image/png" href="assets/icon/icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { fluxfy: { yellow: '#F5C71A', dark: '#D4A810', black: '#111111' } } } }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+         
+    <!-- Scripts Principais e Blindagem de Rota -->
+    <script src="script.js"></script>
+    <script>
+        window.onload = function() {
+            if(typeof AuthConfig !== 'undefined') AuthConfig.protegerRota(['admin', 'operador']);
+        };
+    </script>
+         
+    <script src="perfil.js" defer></script>
+    <script src="sidebar-loader.js" defer></script>
+    <script src="header-loader.js" defer></script>
+</head>
+<body class="admin-body bg-gray-50 dark:bg-gray-900 transition-colors duration-300 text-gray-800 dark:text-gray-200 flex h-screen overflow-hidden">
+         
+    <!-- Sidebar -->
+    <div id="sidebar-container" class="flex-shrink-0"></div>
+         
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <div id="header-container"></div>
+                 
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 no-scrollbar">
+            <div class="max-w-3xl mx-auto space-y-6">
+                 
+                <!-- Card de Informações Básicas -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Informações da Conta</h2>
+                    <form id="formPerfil" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome Completo</label>
+                            <input type="text" id="perfilNome" required class="w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-mail (Identificação)</label>
+                            <input type="email" id="perfilEmail" disabled class="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg cursor-not-allowed">
+                            <p class="text-xs text-gray-400 mt-1">O e-mail não pode ser alterado diretamente.</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Perfil de Acesso</label>
+                            <input type="text" id="perfilPapel" disabled class="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg cursor-not-allowed uppercase font-semibold text-xs tracking-wider">
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="px-5 py-2.5 bg-fluxfy-yellow hover:bg-fluxfy-dark text-fluxfy-black font-bold rounded-lg shadow transition-colors">
+                                Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Card de Alteração de Senha -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Segurança (Alterar Senha)</h2>
+                    <form id="formSenha" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Senha Atual</label>
+                            <input type="password" id="senhaAtual" required class="w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nova Senha</label>
+                                <input type="password" id="novaSenha" required minlength="6" class="w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirme a Nova Senha</label>
+                                <input type="password" id="confirmaSenha" required minlength="6" class="w-full px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="px-5 py-2.5 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold rounded-lg transition-colors">
+                                Atualizar Senha
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</body>
+</html>
