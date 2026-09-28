@@ -4,12 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 from passlib.context import CryptContext
-from sqlalchemy import Column, Integer, String, Numeric, DateTime, func
+from sqlalchemy import func
 from api.database import engine, SessionLocal
 from api import models
 from api.chatbot import router as chatbot_router
 from datetime import datetime, date
-
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -135,32 +134,43 @@ def excluir_usuario(usuario_id: int, db = Depends(get_db)):
     return {"mensagem": "Usuário excluído/recusado com sucesso"}
 
 
-# --- MODELO E ROTAS DE PRODUTOS (ESTOQUE) ---
-class Produto(models.Base):
-    __tablename__ = "produtos"
-    id = Column(Integer, primary_key=True, index=True)
-    nome = Column(String, nullable=False)
-    categoria = Column(String, nullable=False)
-    qtd = Column(Integer, default=0)
-    preco = Column(Numeric(10, 2), default=0.00)
-    data_criacao = Column(DateTime, default=datetime.utcnow)
+# --- ROTAS DE CATEGORIAS (5ª TABELA) ---
+@app.get("/api/categorias")
+def listar_categorias(db = Depends(get_db)):
+    return db.query(models.Categoria).all()
 
+class CategoriaCreate(BaseModel):
+    nome: str
+    descricao: str | None = None
+
+@app.post("/api/categorias")
+def criar_categoria(cat: CategoriaCreate, db = Depends(get_db)):
+    nova_cat = models.Categoria(nome=cat.nome, descricao=cat.descricao)
+    db.add(nova_cat)
+    db.commit()
+    db.refresh(nova_cat)
+    return {"mensagem": "Categoria criada com sucesso", "id": nova_cat.id}
+
+
+# --- ROTAS DE PRODUTOS (ESTOQUE) ---
 class ProdutoCreate(BaseModel):
     nome: str
     categoria: str
+    categoria_id: int | None = None
     qtd: int
     preco: float
 
 @app.get("/api/produtos")
 def listar_produtos(db = Depends(get_db)):
-    produtos = db.query(Produto).all()
+    produtos = db.query(models.Produto).all()
     return produtos
 
 @app.post("/api/produtos")
 def criar_produto(produto: ProdutoCreate, db = Depends(get_db)):
-    novo_produto = Produto(
+    novo_produto = models.Produto(
         nome=produto.nome,
         categoria=produto.categoria,
+        categoria_id=produto.categoria_id,
         qtd=produto.qtd,
         preco=produto.preco,
         data_criacao=datetime.utcnow()
@@ -172,14 +182,15 @@ def criar_produto(produto: ProdutoCreate, db = Depends(get_db)):
 
 @app.delete("/api/produtos/{produto_id}")
 def excluir_produto(produto_id: int, db = Depends(get_db)):
-    prod = db.query(Produto).filter(Produto.id == produto_id).first()
+    prod = db.query(models.Produto).filter(models.Produto.id == produto_id).first()
     if not prod:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     db.delete(prod)
     db.commit()
     return {"mensagem": "Produto excluído com sucesso"}
 
-# --- MODELOS E ROTAS DE VENDAS ---
+
+# --- ROTAS DE VENDAS ---
 class ItemCarrinhoSchema(BaseModel):
     id: int
     nome: str
@@ -219,7 +230,7 @@ def finalizar_venda(venda_dados: VendaCreateSchema, db = Depends(get_db)):
             db.add(novo_item)
 
             # Dá baixa automática no estoque do produto
-            produto_db = db.query(Produto).filter(Produto.id == item.id).first()
+            produto_db = db.query(models.Produto).filter(models.Produto.id == item.id).first()
             if produto_db:
                 produto_db.qtd = max(0, produto_db.qtd - item.quantidade)
 
