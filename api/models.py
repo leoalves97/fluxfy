@@ -35,14 +35,18 @@ class Produto(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(String, nullable=False)
-    categoria = Column(String, nullable=False)  # Mantido para compatibilidade com o front atual
-    categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=True) # Chave estrangeira ligando à tabela categorias
+    categoria = Column(String, nullable=False)  # Mantido para compatibilidade
+    
+    # Chave estrangeira oficial ligando à tabela categorias
+    categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=True)
+    
     qtd = Column(Integer, default=0)
     preco = Column(Numeric(10, 2), default=0.00)
     data_criacao = Column(DateTime, default=datetime.utcnow)
 
-    # Relacionamento com categoria
+    # Relacionamentos
     categoria_rel = relationship("Categoria", back_populates="produtos")
+    itens_venda = relationship("ItemVenda", back_populates="produto_rel")
 
 class Venda(Base):
     __tablename__ = "vendas"
@@ -61,9 +65,13 @@ class ItemVenda(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     venda_id = Column(Integer, ForeignKey("vendas.id"), nullable=False)
-    produto_id = Column(Integer, nullable=False)
+    
+    # Chave estrangeira oficial ligando à tabela produtos
+    produto_id = Column(Integer, ForeignKey("produtos.id"), nullable=False)
+    
     nome_produto = Column(String, nullable=False)
     quantidade = Column(Integer, nullable=False)
     preco_unitario = Column(Numeric(10, 2), nullable=False)
     
     venda = relationship("Venda", back_populates="itens")
+    produto_rel = relationship("Produto", back_populates="itens_venda")
