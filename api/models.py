@@ -14,10 +14,35 @@ class Usuario(Base):
     papel = Column(String, default="user") # 'admin' ou 'user'
     aprovado = Column(Boolean, default=False)
     data_criacao = Column(DateTime, default=datetime.utcnow) 
-          
+         
     # Campos para integração futura com n8n
     id_painel_aws = Column(String, index=True, nullable=True)
     aws_secret = Column(String, nullable=True)
+
+class Categoria(Base):
+    __tablename__ = "categorias"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, unique=True, nullable=False)
+    descricao = Column(String, nullable=True)
+    data_criacao = Column(DateTime, default=datetime.utcnow)
+
+    # Relacionamento: Uma categoria possui vários produtos
+    produtos = relationship("Produto", back_populates="categoria_rel")
+
+class Produto(Base):
+    __tablename__ = "produtos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, nullable=False)
+    categoria = Column(String, nullable=False)  # Mantido para compatibilidade com o front atual
+    categoria_id = Column(Integer, ForeignKey("categorias.id"), nullable=True) # Chave estrangeira ligando à tabela categorias
+    qtd = Column(Integer, default=0)
+    preco = Column(Numeric(10, 2), default=0.00)
+    data_criacao = Column(DateTime, default=datetime.utcnow)
+
+    # Relacionamento com categoria
+    categoria_rel = relationship("Categoria", back_populates="produtos")
 
 class Venda(Base):
     __tablename__ = "vendas"
