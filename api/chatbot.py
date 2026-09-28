@@ -11,7 +11,7 @@ Requer:
 - variável ANTHROPIC_API_KEY definida no .env da pasta api/
   (o mesmo .env que já guarda o DATABASE_URL)
 """
-
+import logging
 import os
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -22,6 +22,8 @@ import anthropic
 load_dotenv(override=True)
 
 router = APIRouter()
+logger = logging.getLogger("uvicorn.error")
+logger.info("ANTHROPIC_API_KEY configurada: %s", bool(os.getenv("ANTHROPIC_API_KEY")))
 
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
@@ -42,8 +44,7 @@ class MensagemChat(BaseModel):
 
 
 def gerar_resposta(mensagem: str) -> str:
-    """Chama a API do Claude. Se der qualquer problema (sem chave, sem internet,
-    limite de uso etc.), cai num aviso simples em vez de quebrar o chat."""
+    """Chama a API do Claude e registra nos logs o motivo real de qualquer falha."""
     try:
         resposta = client.messages.create(
             model=MODELO,
@@ -53,8 +54,16 @@ def gerar_resposta(mensagem: str) -> str:
         )
         return resposta.content[0].text
     except anthropic.AuthenticationError:
+        logger.error("Chatbot: chave da API invalida ou expirada")
         return "A chave da API do Claude não foi configurada corretamente no servidor."
+    except anthropic.RateLimitError:
+        logger.warning("Chatbot: limite de requisicoes atingido")
+        return "Muitas perguntas ao mesmo tempo. Tenta de novo em 1 minuto."
+    except anthropic.APIStatusError as e:
+        logger.error("Chatbot: erro da API %s - %s", e.status_code, e.message)
+        return "Não consegui falar com a IA agora. Tenta de novo em instantes."
     except Exception:
+        logger.exception("Chatbot: erro inesperado (chave ausente?)")
         return "Não consegui falar com a IA agora. Tenta de novo em instantes."
 
 
