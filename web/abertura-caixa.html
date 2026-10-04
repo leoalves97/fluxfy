@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fluxfy - Frente de Caixa (PDV)</title>
-    
     <link rel="icon" type="image/png" href="assets/icon/icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -14,27 +13,21 @@
         }
     </script>
     <link rel="stylesheet" href="style.css">
-    
-    <!-- Scripts Principais e Blindagem -->
     <script src="script.js"></script>
     <script>
         window.onload = function() {
             if(typeof AuthConfig !== 'undefined') AuthConfig.protegerRota(['admin', 'operador']);
         };
     </script>
-    
     <script src="abertura-caixa.js" defer></script>
-	<script src="chatbot.js" defer></script>
+    <script src="chatbot.js" defer></script>
     <script src="sidebar-loader.js" defer></script>
     <script src="header-loader.js" defer></script>
 </head>
 <body class="admin-body bg-gray-50 dark:bg-gray-900 transition-colors duration-300 text-gray-800 dark:text-gray-200 flex h-screen overflow-hidden">
-    
     <div id="sidebar-container" class="flex-shrink-0"></div>
-    
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
         <div id="header-container"></div>
-        
         <div class="flex-1 overflow-y-auto p-4 md:p-6 no-scrollbar relative flex flex-col">
             
             <!-- ESTADO 1: ABERTURA DO CAIXA -->
@@ -86,7 +79,9 @@
                     </div>
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Turno Encerrado</h2>
                     <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">O caixa foi fechado definitivamente para o dia de hoje. Não é possível realizar novas vendas.</p>
-                    
+                    <button onclick="imprimirRelatorioCaixa()" class="mb-4 w-full py-3 px-4 rounded-lg font-bold text-gray-700 bg-gray-200 hover:bg-gray-300 dark:text-gray-200 dark:bg-gray-700 transition-colors">
+                        Imprimir Relatório de Fechamento (PDF)
+                    </button>
                     <!-- Botão exclusivo para Admin -->
                     <div id="admin-override-container" class="hidden border-t border-gray-200 dark:border-gray-700 pt-6 mt-2">
                         <p class="text-xs text-gray-400 mb-3">Acesso Administrativo detectado.</p>
@@ -101,17 +96,21 @@
             <div id="estado-pdv" class="hidden flex-1 flex-col lg:flex-row gap-4 md:gap-6 overflow-y-auto lg:overflow-hidden pb-10 lg:pb-0 h-full">
                 
                 <div class="flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden min-h-[500px] lg:min-h-0">
-                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-50 dark:bg-gray-800/50">
-                        <input type="text" id="buscaPdv" placeholder="Buscar produto..." class="w-full sm:max-w-md px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 bg-gray-50 dark:bg-gray-800/50">
+                        <input type="text" id="buscaPdv" placeholder="Buscar produto..." class="w-full xl:max-w-sm px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
                         
-                        <!-- Botões de Controle de Caixa -->
-                        <div class="flex gap-2 w-full sm:w-auto">
-                            <button onclick="pausarCaixa()" class="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 rounded-lg transition-colors flex items-center justify-center gap-2" title="Pausar para descanso">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <!-- Botões de Controle de Caixa e Relatórios -->
+                        <div class="flex flex-wrap gap-2 w-full xl:w-auto">
+                            <button onclick="abrirModalMovimentos()" class="flex-1 xl:flex-none px-3 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 rounded-lg transition-colors flex items-center justify-center gap-2" title="Ver Movimentações e Estornos">
+                                Movimentos
+                            </button>
+                            <button onclick="abrirModalResumo()" class="flex-1 xl:flex-none px-3 py-2 text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400 rounded-lg transition-colors flex items-center justify-center gap-2" title="Resumo Financeiro">
+                                Resumo
+                            </button>
+                            <button onclick="pausarCaixa()" class="flex-1 xl:flex-none px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 rounded-lg transition-colors flex items-center justify-center gap-2" title="Pausar para descanso">
                                 Pausar
                             </button>
-                            <button onclick="encerrarCaixaDefinitivo()" class="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 rounded-lg transition-colors flex items-center justify-center gap-2" title="Fechar definitivamente">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <button onclick="prepararEncerramento()" class="flex-1 xl:flex-none px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 rounded-lg transition-colors flex items-center justify-center gap-2" title="Fechar definitivamente">
                                 Encerrar Dia
                             </button>
                         </div>
@@ -153,8 +152,79 @@
                     </div>
                 </div>
             </div>
-            
         </div>
     </main>
+
+    <!-- MODAL: Movimentações e Estorno -->
+    <div id="modalMovimentos" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6 border border-gray-200 dark:border-gray-700 flex flex-col max-h-[80vh]">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">Movimentações do Caixa</h3>
+                <button onclick="fecharModalMovimentos()" class="text-gray-500 hover:text-gray-700 font-bold">&times;</button>
+            </div>
+            <div class="overflow-y-auto flex-1 no-scrollbar border rounded-lg border-gray-200 dark:border-gray-700">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50 dark:bg-gray-900/50 text-sm">
+                        <tr>
+                            <th class="p-3">Data/Hora</th>
+                            <th class="p-3">Comanda</th>
+                            <th class="p-3">Forma</th>
+                            <th class="p-3">Valor</th>
+                            <th class="p-3 text-right">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaMovimentos" class="divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+                        <!-- Preenchido via JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 flex justify-end gap-3">
+                <button onclick="imprimirRelatorioCaixa()" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-300">Imprimir Relatório</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Resumo Financeiro -->
+    <div id="modalResumo" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-sm w-full p-6 border border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Resumo Financeiro</h3>
+            <ul class="space-y-3 mb-6">
+                <li class="flex justify-between text-gray-600 dark:text-gray-400"><span>Fundo de Troco:</span> <strong id="res-fundo" class="text-gray-900 dark:text-white">R$ 0,00</strong></li>
+                <li class="flex justify-between text-gray-600 dark:text-gray-400"><span>Dinheiro:</span> <strong id="res-dinheiro" class="text-gray-900 dark:text-white">R$ 0,00</strong></li>
+                <li class="flex justify-between text-gray-600 dark:text-gray-400"><span>PIX:</span> <strong id="res-pix" class="text-gray-900 dark:text-white">R$ 0,00</strong></li>
+                <li class="flex justify-between text-gray-600 dark:text-gray-400"><span>Cartão:</span> <strong id="res-cartao" class="text-gray-900 dark:text-white">R$ 0,00</strong></li>
+                <li class="flex justify-between pt-3 border-t border-gray-200 dark:border-gray-700 text-lg"><span>Total em Caixa:</span> <strong id="res-total" class="text-fluxfy-dark dark:text-fluxfy-yellow">R$ 0,00</strong></li>
+            </ul>
+            <button onclick="fecharModalResumo()" class="w-full py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-lg">Fechar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: Confirmação de Encerramento -->
+    <div id="modalEncerramento" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6 border border-red-200 dark:border-red-900/30 flex flex-col max-h-[90vh]">
+            <h3 class="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Confirmação de Encerramento</h3>
+            <p class="text-sm text-gray-500 mb-4">Deseja realmente encerrar o caixa? Confira o resumo e histórico de vendas abaixo.</p>
+            
+            <div class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg mb-4">
+                <ul class="space-y-2 text-sm">
+                    <li class="flex justify-between text-gray-600 dark:text-gray-400"><span>Fundo:</span> <strong id="enc-fundo" class="text-gray-900 dark:text-white"></strong></li>
+                    <li class="flex justify-between text-gray-600 dark:text-gray-400"><span>Dinheiro:</span> <strong id="enc-dinheiro" class="text-gray-900 dark:text-white"></strong></li>
+                    <li class="flex justify-between text-gray-600 dark:text-gray-400"><span>PIX:</span> <strong id="enc-pix" class="text-gray-900 dark:text-white"></strong></li>
+                    <li class="flex justify-between text-gray-600 dark:text-gray-400"><span>Cartão:</span> <strong id="enc-cartao" class="text-gray-900 dark:text-white"></strong></li>
+                    <li class="flex justify-between pt-2 mt-2 border-t font-bold text-base"><span>Total:</span> <strong id="enc-total" class="text-gray-900 dark:text-white"></strong></li>
+                </ul>
+            </div>
+            
+            <p class="text-sm font-semibold mb-2 dark:text-white">Histórico Cronológico:</p>
+            <div class="overflow-y-auto flex-1 mb-4 border rounded-lg p-2 bg-gray-50 dark:bg-gray-900/50 dark:border-gray-700">
+                <ul id="enc-movimentos-lista" class="space-y-1"></ul>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="fecharModalEncerramento()" class="flex-1 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button onclick="confirmarEncerramento()" class="flex-1 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 shadow-md">Sim, Encerrar Dia</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

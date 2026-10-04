@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fluxfy - Configurações do Sistema</title>
-         
     <link rel="icon" type="image/png" href="assets/icon/icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -14,34 +13,25 @@
         }
     </script>
     <link rel="stylesheet" href="style.css">
-         
-    <!-- Scripts Principais e Blindagem da Rota (Apenas Admin) -->
     <script src="script.js"></script>
     <script>
         window.onload = function() {
             if(typeof AuthConfig !== 'undefined') AuthConfig.protegerRota(['admin']);
         };
     </script>
-         
     <script src="configuracoes.js" defer></script>
-	<script src="chatbot.js" defer></script>
+    <script src="chatbot.js" defer></script>
     <script src="sidebar-loader.js" defer></script>
     <script src="header-loader.js" defer></script>
 </head>
 <body class="admin-body bg-gray-50 dark:bg-gray-900 transition-colors duration-300 text-gray-800 dark:text-gray-200 flex h-screen overflow-hidden">
-         
-    <!-- Sidebar -->
     <div id="sidebar-container" class="flex-shrink-0"></div>
-         
-    <!-- Conteúdo Principal -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
         <div id="header-container"></div>
-                 
         <div class="flex-1 overflow-y-auto p-4 md:p-6 no-scrollbar">
             <div class="max-w-4xl mx-auto space-y-6">
                 
                 <form id="formConfiguracoes" class="space-y-6">
-                    
                     <!-- 1. Dados da Empresa -->
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                         <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
@@ -122,15 +112,35 @@
                         </div>
                     </div>
 
-                    <!-- Botão de Salvar -->
                     <div class="flex justify-end pt-2">
                         <button type="submit" class="px-6 py-3 bg-fluxfy-yellow hover:bg-fluxfy-dark text-fluxfy-black font-bold rounded-lg shadow transition-colors flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             Salvar Configurações
                         </button>
                     </div>
-
                 </form>
+
+                <!-- 4. Gerenciamento de Categorias (Ativo/Inativo) -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mt-6">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-fluxfy-dark dark:text-fluxfy-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                        Categorias de Produtos
+                    </h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Gerencie as categorias disponíveis para vincular aos produtos no estoque.</p>
+                    
+                    <div class="flex gap-2 mb-6">
+                        <input type="text" id="novaCategoria" placeholder="Ex: Bebidas, Lanches..." class="flex-1 px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg outline-none focus:ring-2 focus:ring-fluxfy-yellow">
+                        <button onclick="adicionarCategoria()" type="button" class="px-4 py-2 bg-gray-900 text-white dark:bg-gray-200 dark:text-black font-bold rounded-lg hover:bg-gray-800 dark:hover:bg-white transition-colors">
+                            Adicionar
+                        </button>
+                    </div>
+
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                        <ul id="listaCategorias" class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <!-- Preenchido via JS -->
+                        </ul>
+                    </div>
+                </div>
 
             </div>
         </div>
