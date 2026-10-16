@@ -1,6 +1,6 @@
 /* 
  * admin.js 
- * Lógica do Painel Administrativo: Busca os usuários pendentes na nova API unificada.
+ * Lógica do Painel Administrativo: Busca usuários pendentes, resumo de vendas e renderiza os gráficos do Dashboard.
  */
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Verificação de Segurança
@@ -37,8 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. Carrega os usuários pendentes
     carregarUsuariosPendentes();
 
-    // 5. carregar as vendas reais no painel:
+    // 5. Carrega o resumo de vendas no painel
     carregarResumoDashboard();
+
+    // 6. Carrega os gráficos do dashboard
+    carregarGraficosDashboard();
 });
 
 async function carregarUsuariosPendentes() {
@@ -138,5 +141,56 @@ async function carregarResumoDashboard() {
         }
     } catch (error) {
         console.error('Erro ao carregar resumo de vendas:', error);
+    }
+}
+
+async function carregarGraficosDashboard() {
+    try {
+        const response = await fetch('https://3.21.52.233.nip.io/api/vendas/graficos');
+        if (!response.ok) return;
+        const data = await response.json();
+
+        // 1. Gráfico de Pagamentos (Rosca / Doughnut)
+        const ctxPag = document.getElementById('graficoPagamentos').getContext('2d');
+        new Chart(ctxPag, {
+            type: 'doughnut',
+            data: {
+                labels: data.pagamentos.labels.length > 0 ? data.pagamentos.labels : ['Sem Vendas'],
+                datasets: [{
+                    data: data.pagamentos.valores.length > 0 ? data.pagamentos.valores : [1],
+                    backgroundColor: ['#F5C71A', '#3B82F6', '#10B981', '#EF4444']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        // 2. Gráfico de Evolução (Linha)
+        const ctxEvol = document.getElementById('graficoEvolucao').getContext('2d');
+        new Chart(ctxEvol, {
+            type: 'line',
+            data: {
+                labels: data.evolucao.labels.length > 0 ? data.evolucao.labels : ['Hoje'],
+                datasets: [{
+                    label: 'Total de Vendas (R$)',
+                    data: data.evolucao.valores.length > 0 ? data.evolucao.valores : [0],
+                    borderColor: '#F5C71A',
+                    backgroundColor: 'rgba(245, 199, 26, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+    } catch (err) {
+        console.error("Erro ao carregar gráficos:", err);
     }
 }
