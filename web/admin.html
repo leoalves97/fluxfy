@@ -30,6 +30,7 @@
 	<script src="chatbot.js" defer></script>
     <script src="sidebar-loader.js" defer></script>
     <script src="header-loader.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="admin-body bg-gray-50 dark:bg-gray-900 transition-colors duration-300 text-gray-800 dark:text-gray-200 flex h-screen overflow-hidden">
     <!-- Sidebar (Menu Lateral) -->
@@ -43,20 +44,38 @@
         <!-- Conteúdo Rolável -->
         <div class="flex-1 overflow-y-auto p-6 no-scrollbar">
             <!-- Cards de Resumo -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Vendas Hoje</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2" id="valorVendasHoje">R$ 0,00</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Itens em Estoque Baixo</p>
-                    <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-2">3</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Solicitações Pendentes</p>
-                    <p class="text-2xl font-bold text-fluxfy-dark dark:text-fluxfy-yellow mt-2" id="contadorPendentes">Carregando...</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Vendas Hoje</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2" id="valorVendasHoje">R$ 0,00</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Itens em Estoque Baixo</p>
+                <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-2">3</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Solicitações Pendentes</p>
+                <p class="text-2xl font-bold text-fluxfy-dark dark:text-fluxfy-yellow mt-2" id="contadorPendentes">Carregando...</p>
+            </div>
+        </div>
+
+        <!-- SEÇÃO DE GRÁFICOS DO DASHBOARD -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Gráfico 1: Vendas por Forma de Pagamento (Doughnut) -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+                <h3 class="text-base font-bold text-gray-800 dark:text-white mb-4 self-start">Vendas por Forma de Pagamento</h3>
+                <div class="w-full h-64 flex justify-center items-center">
+                    <canvas id="graficoPagamentos"></canvas>
                 </div>
             </div>
+            <!-- Gráfico 2: Evolução de Vendas (Line Chart) -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+                <h3 class="text-base font-bold text-gray-800 dark:text-white mb-4 self-start">Evolução Diária de Vendas</h3>
+                <div class="w-full h-64 flex justify-center items-center">
+                    <canvas id="graficoEvolucao"></canvas>
+                </div>
+            </div>
+        </div>
 
             <!-- Tabela de Aprovação de Usuários -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">

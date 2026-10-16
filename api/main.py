@@ -267,3 +267,35 @@ def resumo_vendas(db = Depends(get_db)):
             "vendas_total": 0.0,
             "total_pedidos": 0
         }
+
+
+@app.get("/api/vendas/graficos")
+def dados_graficos_vendas(db = Depends(get_db)):
+    try:
+        # 1. Vendas por Forma de Pagamento
+        pagamentos = db.query(
+            models.Venda.forma_pagamento, 
+            func.sum(models.Venda.total)
+        ).group_by(models.Venda.forma_pagamento).all()
+        
+        labels_pag = [p[0].upper() for p in pagamentos]
+        valores_pag = [float(p[1]) for p in pagamentos]
+
+        # 2. Total de Vendas por Dia (últimos dias ou geral)
+        vendas_por_data = db.query(
+            func.date(models.Venda.data_criacao),
+            func.sum(models.Venda.total)
+        ).group_by(func.date(models.Venda.data_criacao)).order_by(func.date(models.Venda.data_criacao)).all()
+
+        labels_data = [str(v[0]) for v in vendas_por_data]
+        valores_data = [float(v[1]) for v in vendas_por_data]
+
+        return {
+            "pagamentos": {"labels": labels_pag, "valores": valores_pag},
+            "evolucao": {"labels": labels_data, "valores": valores_data}
+        }
+    except Exception as e:
+        return {
+            "pagamentos": {"labels": [], "valores": []},
+            "evolucao": {"labels": [], "valores": []}
+        }
