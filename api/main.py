@@ -23,6 +23,14 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Fluxfy API")
 
+# Configure o CORS explicitamente permitindo o Vercel e localhost
+origins = [
+    "https://fluxfy-one.vercel.app",
+    "http://localhost",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500"
+]
+
 # Configurações de ambiente
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://fluxfy-one.vercel.app").rstrip("/")
 
