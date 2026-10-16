@@ -1,3 +1,14 @@
 3.21.52.233.nip.io {
+    header {
+        Access-Control-Allow-Origin "*"
+        Access-Control-Allow-Methods "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+        Access-Control-Allow-Headers "Content-Type, Authorization"
+    }
+    
+    # Responde imediatamente a requisições OPTIONS (preflight do CORS)
+    handle_method OPTIONS {
+        respond 204
+    }
+
     reverse_proxy api:8000
 }
