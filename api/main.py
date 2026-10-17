@@ -1,4 +1,5 @@
 import os
+import httpx
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -9,6 +10,7 @@ from api.database import engine, SessionLocal
 from api import models
 from api.chatbot import router as chatbot_router
 from datetime import datetime, date
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -298,4 +300,46 @@ def dados_graficos_vendas(db = Depends(get_db)):
         return {
             "pagamentos": {"labels": [], "valores": []},
             "evolucao": {"labels": [], "valores": []}
+        }
+
+class PixRequestSchema(BaseModel):
+    transaction_amount: float
+    description: str
+    payer_email: str
+
+@app.post("/api/pagamento/pix")
+async def gerar_pagamento_pix(dados: PixRequestSchema):
+    mp_token = os.getenv("MERCADOPAGO_ACCESS_TOKEN")
+    if not mp_token:
+        raise HTTPException(status_code=500, detail="Token do Mercado Pago não configurado no servidor.")
+
+    url = "https://api.mercadopago.com/v1/payments"
+    headers = {
+        "Authorization": f"Bearer {mp_token}",
+        "Content-Type": "application/json",
+        "X-Idempotency-Key": str(datetime.utcnow().timestamp())
+    }
+    payload = {
+        "transaction_amount": dados.transaction_amount,
+        "description": dados.description,
+        "payment_method_id": "pix",
+        "payer": {
+            "email": dados.payer_email
+        }
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload, headers=headers)
+        if response.status_code != 201:
+            raise HTTPException(status_code=400, detail=f"Erro ao gerar Pix no Mercado Pago: {response.text}")
+        
+        mp_data = response.json()
+        point_of_interaction = mp_data.get("point_of_interaction", {})
+        qr_data = point_of_interaction.get("transaction_data", {})
+
+        return {
+            "payment_id": mp_data.get("id"),
+            "status": mp_data.get("status"),
+            "qr_code_base64": qr_data.get("qr_code_base64"),
+            "qr_code": qr_data.get("qr_code") # O código Pix Copia e Cola
         }

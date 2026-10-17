@@ -226,5 +226,35 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL: Pagamento PIX Mercado Pago -->
+    <div id="modalPix" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 border border-gray-200 dark:border-gray-700 text-center">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Efetuar Pagamento via PIX</h3>
+            <p class="text-sm text-gray-500 mb-4">Escaneie o QR Code abaixo ou utilize o Copia e Cola para pagar.</p>
+            
+            <div id="pixLoading" class="py-10">
+                <p class="text-sm text-gray-500 animate-pulse">Gerando QR Code no Mercado Pago...</p>
+            </div>
+
+            <div id="pixConteudo" class="hidden space-y-4">
+                <div class="flex justify-center">
+                    <img id="imgQrCodePix" src="" alt="QR Code Pix" class="w-48 h-48 object-contain border rounded-lg p-2 bg-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1">Pix Copia e Cola:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="inputCopiaCola" readonly class="w-full px-3 py-2 text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded border outline-none">
+                        <button onclick="copiarPixCopiaCola()" class="px-3 py-2 bg-fluxfy-yellow text-fluxfy-black text-xs font-bold rounded hover:bg-fluxfy-dark">Copiar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex gap-3">
+                <button onclick="fecharModalPix()" class="flex-1 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-lg">Cancelar</button>
+                <button onclick="concluirPedidoPixAprovado()" class="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow">Confirmar e Concluir Venda</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
