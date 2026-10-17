@@ -1,7 +1,7 @@
 /*
  * abertura-caixa.js
  * Lógica da Frente de Caixa (PDV), Máquina de Estados, Movimentações e Persistência.
- * Atualizado: Sessões isoladas por usuário logado.
+ * Atualizado: Sessões isoladas por usuário logado e layout de imagens horizontal.
  */
 let carrinho = [];
 let formaPagamentoSelecionada = null;
@@ -373,6 +373,7 @@ function renderizarGradeProdutos(filtro = '') {
         card.className = "bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl p-3 cursor-pointer hover:border-fluxfy-yellow hover:shadow-md transition-all group flex flex-col justify-between h-full";
         card.onclick = () => adicionarAoCarrinho(prod);
 
+        // Bloco de imagem em formato horizontal (paisagem) ajustado
         const imagemHtml = prod.imagem
             ? `<div class="w-full h-24 overflow-hidden rounded-lg mb-3 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                 <img src="${prod.imagem}" alt="${prod.nome}" class="w-full h-full object-cover">
@@ -590,7 +591,7 @@ async function processarVendaNoServidor(numeroComandaStr, totalPedido, formaPaga
         saldos[formaPagamento] += totalPedido;
         localStorage.setItem(getCaixaKey('fluxfy_saldos'), JSON.stringify(saldos));
 
-        let movimentos = JSON.parse(localStorage.getItem(getCaixaKey('fluxfy_movimentos'))) || [];
+        let movimentos = JSON.parse(localStorage.getItem(getCaKey('fluxfy_movimentos'))) || [];
         movimentos.push({
             id: Date.now(),
             comanda: numeroComandaStr,
@@ -599,7 +600,7 @@ async function processarVendaNoServidor(numeroComandaStr, totalPedido, formaPaga
             data: obterDataHora(),
             estornado: false
         });
-        localStorage.setItem(getCaixaKey('fluxfy_movimentos'), JSON.stringify(movimentos));
+        localStorage.setItem(getCaKey('fluxfy_movimentos'), JSON.stringify(movimentos));
 
         alert(`Comanda #${numeroComandaStr} Finalizada!\nValor: R$ ${totalPedido.toFixed(2)}\nForma: ${formaPagamento.toUpperCase()}`);
 
