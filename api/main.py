@@ -33,6 +33,14 @@ origins = [
     "http://127.0.0.1:5500"
 ]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Configurações de ambiente
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://fluxfy-one.vercel.app").rstrip("/")
 
@@ -135,7 +143,7 @@ def excluir_usuario(usuario_id: int, db = Depends(get_db)):
     return {"mensagem": "Usuário excluído/recusado com sucesso"}
 
 
-# --- ROTAS DE CATEGORIAS (5ª TABELA) ---
+# --- ROTAS DE CATEGORIAS ---
 @app.get("/api/categorias")
 def listar_categorias(db = Depends(get_db)):
     return db.query(models.Categoria).all()
@@ -160,6 +168,17 @@ class ProdutoCreate(BaseModel):
     categoria_id: int | None = None
     qtd: int
     preco: float
+    imagem: str | None = None
+    preco_compra: float | None = 0.00
+
+class ProdutoAjusteSchema(BaseModel):
+    tipo: str  # 'igualdade', 'adicao', 'subtracao'
+    quantidade: int
+    observacao: str | None = None
+    categoria: str | None = None
+    imagem: str | None = None
+    preco_compra: float | None = None
+    preco: float | None = None
 
 @app.get("/api/produtos")
 def listar_produtos(db = Depends(get_db)):
@@ -174,12 +193,40 @@ def criar_produto(produto: ProdutoCreate, db = Depends(get_db)):
         categoria_id=produto.categoria_id,
         qtd=produto.qtd,
         preco=produto.preco,
+        imagem=produto.imagem,
+        preco_compra=produto.preco_compra or 0.00,
         data_criacao=datetime.utcnow()
     )
     db.add(novo_produto)
     db.commit()
     db.refresh(novo_produto)
     return {"mensagem": "Produto cadastrado com sucesso", "id": novo_produto.id}
+
+@app.patch("/api/produtos/{produto_id}/ajuste")
+def ajustar_produto(produto_id: int, ajuste: ProdutoAjusteSchema, db = Depends(get_db)):
+    prod = db.query(models.Produto).filter(models.Produto.id == produto_id).first()
+    if not prod:
+        raise HTTPException(status_code=404, detail="Produto não encontrado")
+    
+    if ajuste.categoria:
+        prod.categoria = ajuste.categoria
+    if ajuste.imagem is not None:
+        prod.imagem = ajuste.imagem
+    if ajuste.preco_compra is not None:
+        prod.preco_compra = ajuste.preco_compra
+    if ajuste.preco is not None:
+        prod.preco = ajuste.preco
+
+    if ajuste.tipo == "adicao":
+        prod.qtd += ajuste.quantidade
+    elif ajuste.tipo == "subtracao":
+        prod.qtd = max(0, prod.qtd - ajuste.quantidade)
+    elif ajuste.tipo == "igualdade":
+        prod.qtd = ajuste.quantidade
+
+    db.commit()
+    db.refresh(prod)
+    return {"mensagem": "Produto e estoque ajustados com sucesso", "produto": prod}
 
 @app.delete("/api/produtos/{produto_id}")
 def excluir_produto(produto_id: int, db = Depends(get_db)):
@@ -207,7 +254,6 @@ class VendaCreateSchema(BaseModel):
 @app.post("/api/vendas")
 def finalizar_venda(venda_dados: VendaCreateSchema, db = Depends(get_db)):
     try:
-        # 1. Cria o registro principal da venda
         nova_venda = models.Venda(
             comanda=venda_dados.comanda,
             forma_pagamento=venda_dados.forma_pagamento,
@@ -218,9 +264,7 @@ def finalizar_venda(venda_dados: VendaCreateSchema, db = Depends(get_db)):
         db.commit()
         db.refresh(nova_venda)
 
-        # 2. Registra os itens e desconta do estoque
         for item in venda_dados.itens:
-            # Salva o item na tabela de itens da venda
             novo_item = models.ItemVenda(
                 venda_id=nova_venda.id,
                 produto_id=item.id,
@@ -230,7 +274,6 @@ def finalizar_venda(venda_dados: VendaCreateSchema, db = Depends(get_db)):
             )
             db.add(novo_item)
 
-            # Dá baixa automática no estoque do produto
             produto_db = db.query(models.Produto).filter(models.Produto.id == item.id).first()
             if produto_db:
                 produto_db.qtd = max(0, produto_db.qtd - item.quantidade)
@@ -246,16 +289,11 @@ def finalizar_venda(venda_dados: VendaCreateSchema, db = Depends(get_db)):
 def resumo_vendas(db = Depends(get_db)):
     try:
         hoje = date.today()
-        
-        # Soma o total das vendas de hoje
         vendas_hoje = db.query(func.sum(models.Venda.total))\
             .filter(func.date(models.Venda.data_criacao) == hoje)\
             .scalar() or 0.0
 
-        # Soma o total geral de vendas
         vendas_total = db.query(func.sum(models.Venda.total)).scalar() or 0.0
-
-        # Total de pedidos realizados
         total_pedidos = db.query(models.Venda).count()
 
         return {
@@ -270,11 +308,9 @@ def resumo_vendas(db = Depends(get_db)):
             "total_pedidos": 0
         }
 
-
 @app.get("/api/vendas/graficos")
 def dados_graficos_vendas(db = Depends(get_db)):
     try:
-        # 1. Vendas por Forma de Pagamento
         pagamentos = db.query(
             models.Venda.forma_pagamento, 
             func.sum(models.Venda.total)
@@ -283,7 +319,6 @@ def dados_graficos_vendas(db = Depends(get_db)):
         labels_pag = [p[0].upper() for p in pagamentos]
         valores_pag = [float(p[1]) for p in pagamentos]
 
-        # 2. Total de Vendas por Dia (últimos dias ou geral)
         vendas_por_data = db.query(
             func.date(models.Venda.data_criacao),
             func.sum(models.Venda.total)
@@ -300,6 +335,52 @@ def dados_graficos_vendas(db = Depends(get_db)):
         return {
             "pagamentos": {"labels": [], "valores": []},
             "evolucao": {"labels": [], "valores": []}
+        }
+
+@app.get("/api/financeiro/extrato")
+def extrato_financeiro(db = Depends(get_db)):
+    try:
+        vendas = db.query(models.Venda).order_by(models.Venda.data_criacao.desc()).all()
+        
+        total_pix = 0.0
+        total_dinheiro = 0.0
+        total_cartao = 0.0
+        faturamento_total = 0.0
+        
+        movimentos = []
+        for v in vendas:
+            valor = float(v.total)
+            faturamento_total += valor
+            
+            forma = v.forma_pagamento.lower()
+            if "pix" in forma:
+                total_pix += valor
+            elif "dinheiro" in forma:
+                total_dinheiro += valor
+            elif "cartao" in forma or "cartão" in forma:
+                total_cartao += valor
+                
+            movimentos.append({
+                "id": v.id,
+                "comanda": v.comanda,
+                "data": v.data_criacao.strftime('%d/%m/%Y %H:%M') if v.data_criacao else "-",
+                "forma_pagamento": v.forma_pagamento,
+                "valor": valor
+            })
+            
+        return {
+            "saldos": {
+                "faturamento_total": faturamento_total,
+                "pix": total_pix,
+                "dinheiro": total_dinheiro,
+                "cartao": total_cartao
+            },
+            "movimentos": movimentos
+        }
+    except Exception as e:
+        return {
+            "saldos": {"faturamento_total": 0.0, "pix": 0.0, "dinheiro": 0.0, "cartao": 0.0},
+            "movimentos": []
         }
 
 class PixRequestSchema(BaseModel):
@@ -330,10 +411,6 @@ async def gerar_pagamento_pix(dados: PixRequestSchema):
 
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=payload, headers=headers)
-        
-        # Imprime o erro exato no terminal do Docker para sabermos o motivo do 400
-        print(f"RESPOSTA MERCADO PAGO: {response.status_code} - {response.text}")
-
         if response.status_code != 201:
             raise HTTPException(status_code=400, detail=f"Erro ao gerar Pix no Mercado Pago: {response.text}")
         
