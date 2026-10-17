@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxfy - Painel Financeiro (Admin)</title>
+    <link rel="icon" type="image/png" href="assets/icon/icon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { fluxfy: { yellow: '#F5C71A', dark: '#D4A810', black: '#111111' } } } }
+        }
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+    <script>
+        window.onload = function() {
+            if(typeof AuthConfig !== 'undefined') AuthConfig.protegerRota(['admin']);
+        };
+    </script>
+    <script src="financeiro.js" defer></script>
+    <script src="chatbot.js" defer></script>
+    <script src="sidebar-loader.js" defer></script>
+    <script src="header-loader.js" defer></script>
+</head>
+<body class="admin-body bg-gray-50 dark:bg-gray-900 transition-colors duration-300 text-gray-800 dark:text-gray-200 flex h-screen overflow-hidden">
+    <div id="sidebar-container" class="flex-shrink-0"></div>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <div id="header-container"></div>
+        
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 no-scrollbar space-y-6">
+            <!-- Cards de Métricas Relevantes -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Faturamento Total</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2" id="txtFaturamentoTotal">R$ 0,00</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total via PIX</p>
+                    <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-2" id="txtTotalPix">R$ 0,00</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total em Dinheiro</p>
+                    <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2" id="txtTotalDinheiro">R$ 0,00</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total em Cartão</p>
+                    <p class="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-2" id="txtTotalCartao">R$ 0,00</p>
+                </div>
+            </div>
+
+            <!-- Tabela de Extrato Consolidado -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Extrato de Movimentações Financeiras</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-sm">
+                                <th class="px-6 py-3 font-medium">Comanda</th>
+                                <th class="px-6 py-3 font-medium">Data / Hora</th>
+                                <th class="px-6 py-3 font-medium">Forma de Pagamento</th>
+                                <th class="px-6 py-3 font-medium text-right">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaMovimentosFinanceiros" class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Carregando movimentações...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fluxfy - Painel Administrativo</title>
+    <title>Fluxfy - Dashboard Administrativo</title>
     
     <link rel="icon" type="image/png" href="assets/icon/icon.png">
     
@@ -25,9 +25,8 @@
             if(typeof AuthConfig !== 'undefined') AuthConfig.protegerRota(['admin']);
         };
     </script>
-
     <script src="admin.js" defer></script>
-	<script src="chatbot.js" defer></script>
+    <script src="chatbot.js" defer></script>
     <script src="sidebar-loader.js" defer></script>
     <script src="header-loader.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -42,40 +41,61 @@
         <div id="header-container"></div>
         
         <!-- Conteúdo Rolável -->
-        <div class="flex-1 overflow-y-auto p-6 no-scrollbar">
-            <!-- Cards de Resumo -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Vendas Hoje</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2" id="valorVendasHoje">R$ 0,00</p>
+        <div class="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
+            <!-- Cards de Resumo (KPIs) -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Vendas Hoje</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-2" id="valorVendasHoje">R$ 0,00</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total de Pedidos</p>
+                    <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2" id="totalPedidosGeral">0</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Ticket Médio</p>
+                    <p class="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-2" id="ticketMedioGeral">R$ 0,00</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Solicitações Pendentes</p>
+                    <p class="text-2xl font-bold text-fluxfy-dark dark:text-fluxfy-yellow mt-2" id="contadorPendentes">Carregando...</p>
+                </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Itens em Estoque Baixo</p>
-                <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-2">3</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Solicitações Pendentes</p>
-                <p class="text-2xl font-bold text-fluxfy-dark dark:text-fluxfy-yellow mt-2" id="contadorPendentes">Carregando...</p>
-            </div>
-        </div>
 
-        <!-- SEÇÃO DE GRÁFICOS DO DASHBOARD -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <!-- Gráfico 1: Vendas por Forma de Pagamento (Doughnut) -->
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center">
-                <h3 class="text-base font-bold text-gray-800 dark:text-white mb-4 self-start">Vendas por Forma de Pagamento</h3>
-                <div class="w-full h-64 flex justify-center items-center">
-                    <canvas id="graficoPagamentos"></canvas>
+            <!-- SEÇÃO DE GRÁFICOS DO DASHBOARD (Grid 2x2) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Gráfico 1: Vendas por Forma de Pagamento (Doughnut) -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+                    <h3 class="text-base font-bold text-gray-800 dark:text-white mb-4 self-start">Faturamento por Forma de Pagamento</h3>
+                    <div class="w-full h-64 flex justify-center items-center">
+                        <canvas id="graficoPagamentos"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico 2: Evolução Diária de Vendas (Line Chart) -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+                    <h3 class="text-base font-bold text-gray-800 dark:text-white mb-4 self-start">Evolução Diária de Vendas</h3>
+                    <div class="w-full h-64 flex justify-center items-center">
+                        <canvas id="graficoEvolucao"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico 3: Produtos Mais Vendidos (Bar Chart) -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+                    <h3 class="text-base font-bold text-gray-800 dark:text-white mb-4 self-start">Produtos Mais Vendidos (Volume)</h3>
+                    <div class="w-full h-64 flex justify-center items-center">
+                        <canvas id="graficoProdutos"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico 4: Status do Estoque por Categoria (Pie Chart) -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+                    <h3 class="text-base font-bold text-gray-800 dark:text-white mb-4 self-start">Distribuição de Produtos por Categoria</h3>
+                    <div class="w-full h-64 flex justify-center items-center">
+                        <canvas id="graficoCategoriasEstoque"></canvas>
+                    </div>
                 </div>
             </div>
-            <!-- Gráfico 2: Evolução de Vendas (Line Chart) -->
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col items-center">
-                <h3 class="text-base font-bold text-gray-800 dark:text-white mb-4 self-start">Evolução Diária de Vendas</h3>
-                <div class="w-full h-64 flex justify-center items-center">
-                    <canvas id="graficoEvolucao"></canvas>
-                </div>
-            </div>
-        </div>
 
             <!-- Tabela de Aprovação de Usuários -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
