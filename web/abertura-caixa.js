@@ -374,10 +374,12 @@ function renderizarGradeProdutos(filtro = '') {
         card.onclick = () => adicionarAoCarrinho(prod);
 
         const imagemHtml = prod.imagem
-            ? `<img src="${prod.imagem}" alt="${prod.nome}" class="w-full h-28 object-cover rounded-lg mb-3">`
-            : `<div class="w-full h-28 bg-gray-200 dark:bg-gray-600 rounded-lg mb-3 flex items-center justify-center text-gray-400">
-                 <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-               </div>`;
+            ? `<div class="w-full h-24 overflow-hidden rounded-lg mb-3 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                <img src="${prod.imagem}" alt="${prod.nome}" class="w-full h-full object-cover">
+                </div>`
+            : `<div class="w-full h-24 bg-gray-200 dark:bg-gray-600 rounded-lg mb-3 flex items-center justify-center text-gray-400">
+                <svg class="w-8 h-8 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>`;
 
         card.innerHTML = `
             <div>
