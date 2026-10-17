@@ -1,6 +1,6 @@
 /*
  * estoque.js
- * Lógica do Gerenciamento de Estoque: Uploads Base64 Comprimidos, Relatórios PDF, Integração e Custos.
+ * Lógica do Gerenciamento de Estoque: Uploads Base64 Comprimidos em formato Horizontal, Relatórios PDF, Integração e Custos.
  */
 let produtosLocais = [];
 
@@ -9,16 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
     configurarInputsDeImagem();
 });
 
-// Comprime a imagem no lado do cliente para evitar Payload Too Large na API
+// Comprime e converte a imagem para formato horizontal (paisagem) no lado do cliente
 function configurarInputsDeImagem() {
     const inputNovo = document.getElementById('imagemUploadProduto');
     const inputAjuste = document.getElementById('ajusteImagemUpload');
 
-    inputNovo.addEventListener('change', function() { 
-        lerEComprimirImagem(this, 'imagemBase64Produto', 'previewNovoProduto'); 
+    inputNovo.addEventListener('change', function () {
+        lerEComprimirImagem(this, 'imagemBase64Produto', 'previewNovoProduto');
     });
-    inputAjuste.addEventListener('change', function() { 
-        lerEComprimirImagem(this, 'ajusteImagemBase64', 'previewAjusteProduto'); 
+    inputAjuste.addEventListener('change', function () {
+        lerEComprimirImagem(this, 'ajusteImagemBase64', 'previewAjusteProduto');
     });
 }
 
@@ -26,42 +26,49 @@ function lerEComprimirImagem(inputElement, hiddenElementId, previewElementId) {
     if (inputElement.files && inputElement.files[0]) {
         const file = inputElement.files[0];
         const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                // Redimensiona para no máximo 500x500 mantendo proporção
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 500;
-                const MAX_HEIGHT = 500;
-                let width = img.width;
-                let height = img.height;
 
-                if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
-                }
-                
-                canvas.width = width;
-                canvas.height = height;
+        reader.onload = function (e) {
+            const img = new Image();
+            img.onload = function () {
+                // Configuração para formato horizontal (Proporção Paisagem / 16:9 - ex: 400x225)
+                const canvas = document.createElement('canvas');
+                const TARGET_WIDTH = 400;
+                const TARGET_HEIGHT = 225;
+
+                canvas.width = TARGET_WIDTH;
+                canvas.height = TARGET_HEIGHT;
+
                 const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                // Converte para JPEG com 70% de qualidade
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                
+
+                // Desenha preenchendo o espaço horizontal sem distorcer (object-fit cover manual)
+                let sourceWidth = img.width;
+                let sourceHeight = img.height;
+                let sourceX = 0;
+                let sourceY = 0;
+
+                const targetRatio = TARGET_WIDTH / TARGET_HEIGHT;
+                const sourceRatio = sourceWidth / sourceHeight;
+
+                if (sourceRatio > targetRatio) {
+                    sourceWidth = sourceHeight * targetRatio;
+                    sourceX = (img.width - sourceWidth) / 2;
+                } else {
+                    sourceHeight = sourceWidth / targetRatio;
+                    sourceY = (img.height - sourceHeight) / 2;
+                }
+
+                ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, TARGET_WIDTH, TARGET_HEIGHT);
+
+                // Converte para JPEG com 80% de qualidade
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
                 document.getElementById(hiddenElementId).value = dataUrl;
-                
+
                 const preview = document.getElementById(previewElementId);
                 preview.src = dataUrl;
                 preview.classList.remove('hidden');
+                // Ajusta a preview para mostrar o formato horizontal também
+                preview.className = "mt-3 w-32 h-20 object-cover rounded-lg border border-gray-200 shadow-sm";
             };
             img.src = e.target.result;
         };
@@ -72,22 +79,22 @@ function lerEComprimirImagem(inputElement, hiddenElementId, previewElementId) {
 function carregarCategoriasNosSelects() {
     const selectNovo = document.getElementById('categoriaProduto');
     const selectAjuste = document.getElementById('ajusteCategoria');
-    
+
     const defaultCategorias = [
-        { nome: 'Bebidas', ativa: true }, 
-        { nome: 'Lanches', ativa: true }, 
+        { nome: 'Bebidas', ativa: true },
+        { nome: 'Lanches', ativa: true },
         { nome: 'Sobremesas', ativa: true }
     ];
-    
+
     let categorias = JSON.parse(localStorage.getItem('fluxfy_categorias')) || defaultCategorias;
     if (categorias.length > 0 && typeof categorias[0] === 'string') {
         categorias = categorias.map(c => ({ nome: c, ativa: true }));
     }
-    
+
     const categoriasAtivas = categorias.filter(c => c.ativa === true);
-    const optionsHTML = `<option value="" disabled selected>Selecione uma categoria...</option>` + 
-                        categoriasAtivas.map(cat => `<option value="${cat.nome}">${cat.nome}</option>`).join('');
-    
+    const optionsHTML = `<option value="" disabled selected>Selecione uma categoria...</option>` +
+        categoriasAtivas.map(cat => `<option value="${cat.nome}">${cat.nome}</option>`).join('');
+
     selectNovo.innerHTML = optionsHTML;
     selectAjuste.innerHTML = optionsHTML;
 }
@@ -97,17 +104,17 @@ async function carregarEstoque() {
     const totalProdutos = document.getElementById('totalProdutos');
     const totalBaixoEstoque = document.getElementById('totalBaixoEstoque');
     const valorTotalEstoque = document.getElementById('valorTotalEstoque');
-    
+
     try {
         const response = await fetch('https://3.21.52.233.nip.io/api/produtos');
         if (!response.ok) throw new Error('Erro ao buscar estoque da API');
-        
-        produtosLocais = await response.json(); 
+
+        produtosLocais = await response.json();
         tabela.innerHTML = '';
-        
+
         let qtdBaixa = 0;
         let valorTotal = 0;
-        
+
         if (produtosLocais.length === 0) {
             tabela.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Nenhum produto cadastrado no estoque.</td></tr>`;
             totalProdutos.textContent = 0;
@@ -115,26 +122,26 @@ async function carregarEstoque() {
             valorTotalEstoque.textContent = 'R$ 0,00';
             return;
         }
-        
+
         produtosLocais.forEach(prod => {
             const qtd = Number(prod.qtd);
             const preco = Number(prod.preco);
-            const custo = Number(prod.preco_compra || 0); 
-            
+            const custo = Number(prod.preco_compra || 0);
+
             valorTotal += qtd * preco;
             if (qtd <= 5) qtdBaixa++;
-            
+
             const statusBadge = qtd > 5
                 ? '<span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">Normal</span>'
                 : '<span class="px-2 py-1 text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-full">Baixo</span>';
-            
+
             const tr = document.createElement('tr');
             tr.className = "hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors";
-            
+
             tr.innerHTML = `
                 <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                     <div class="flex items-center gap-3">
-                        ${prod.imagem ? `<img src="${prod.imagem}" class="w-8 h-8 rounded object-cover border border-gray-200">` : `<div class="w-8 h-8 rounded bg-gray-200 flex items-center justify-center text-gray-400 text-xs">Sem</div>`}
+                        ${prod.imagem ? `<img src="${prod.imagem}" class="w-12 h-8 rounded object-cover border border-gray-200">` : `<div class="w-12 h-8 rounded bg-gray-200 flex items-center justify-center text-gray-400 text-xs">Sem</div>`}
                         <span>${prod.nome}</span>
                     </div>
                 </td>
@@ -150,7 +157,7 @@ async function carregarEstoque() {
             `;
             tabela.appendChild(tr);
         });
-        
+
         totalProdutos.textContent = produtosLocais.length;
         totalBaixoEstoque.textContent = qtdBaixa;
         valorTotalEstoque.textContent = `R$ ${valorTotal.toFixed(2)}`;
@@ -167,13 +174,12 @@ window.abrirModalProduto = function () {
     document.getElementById('modalTitulo').textContent = 'Novo Produto';
     document.getElementById('formProduto').reset();
     document.getElementById('produtoId').value = '';
-    
-    // Reseta imagem e preview
+
     document.getElementById('imagemBase64Produto').value = '';
     const preview = document.getElementById('previewNovoProduto');
     preview.src = '';
     preview.classList.add('hidden');
-    
+
     carregarCategoriasNosSelects();
     document.getElementById('modalProduto').classList.remove('hidden');
 }
@@ -187,18 +193,18 @@ document.addEventListener('submit', async (e) => {
         e.preventDefault();
         const nome = document.getElementById('nomeProduto').value.trim();
         const categoria = document.getElementById('categoriaProduto').value;
-        const imagem = document.getElementById('imagemBase64Produto').value; 
+        const imagem = document.getElementById('imagemBase64Produto').value;
         const qtd = parseInt(document.getElementById('qtdProduto').value);
         const preco_compra = parseFloat(document.getElementById('custoProduto').value);
         const preco = parseFloat(document.getElementById('precoProduto').value);
-        
+
         try {
             const res = await fetch('https://3.21.52.233.nip.io/api/produtos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, categoria, imagem, qtd, preco_compra, preco })
             });
-            
+
             if (res.ok) {
                 fecharModalProduto();
                 carregarEstoque();
@@ -215,41 +221,41 @@ document.addEventListener('submit', async (e) => {
 // ==========================================
 // MODAL DE AJUSTE RÁPIDO
 // ==========================================
-window.abrirModalAjuste = function(id) {
+window.abrirModalAjuste = function (id) {
     const produto = produtosLocais.find(p => p.id === id);
     if (!produto) return;
 
     document.getElementById('ajusteProdutoId').value = produto.id;
     document.getElementById('ajusteProdutoNome').textContent = produto.nome;
-    
-    carregarCategoriasNosSelects(); 
-    
+
+    carregarCategoriasNosSelects();
+
     document.getElementById('ajusteCategoria').value = produto.categoria || '';
-    
-    // Configura Preview e Imagem Oculta
-    document.getElementById('ajusteImagemUpload').value = ''; 
-    document.getElementById('ajusteImagemBase64').value = produto.imagem || ''; 
-    
+
+    document.getElementById('ajusteImagemUpload').value = '';
+    document.getElementById('ajusteImagemBase64').value = produto.imagem || '';
+
     const preview = document.getElementById('previewAjusteProduto');
     if (produto.imagem) {
         preview.src = produto.imagem;
         preview.classList.remove('hidden');
+        preview.className = "mt-3 w-32 h-20 object-cover rounded-lg border border-gray-200 shadow-sm";
     } else {
         preview.src = '';
         preview.classList.add('hidden');
     }
-    
+
     document.getElementById('ajusteCusto').value = produto.preco_compra || 0;
     document.getElementById('ajustePreco').value = produto.preco || 0;
-    
+
     document.getElementById('ajusteTipo').value = 'igualdade';
-    document.getElementById('ajusteQtd').value = produto.qtd || 0; 
+    document.getElementById('ajusteQtd').value = produto.qtd || 0;
     document.getElementById('ajusteObservacao').value = "Ajuste de Saldo";
-    
+
     document.getElementById('modalAjusteSaldo').classList.remove('hidden');
 }
 
-window.fecharModalAjuste = function() {
+window.fecharModalAjuste = function () {
     document.getElementById('modalAjusteSaldo').classList.add('hidden');
 }
 
@@ -257,8 +263,8 @@ document.getElementById('formAjusteSaldo').addEventListener('submit', async (e) 
     e.preventDefault();
     const id = document.getElementById('ajusteProdutoId').value;
     const categoria = document.getElementById('ajusteCategoria').value;
-    const imagem = document.getElementById('ajusteImagemBase64').value; 
-    
+    const imagem = document.getElementById('ajusteImagemBase64').value;
+
     const preco_compra = parseFloat(document.getElementById('ajusteCusto').value);
     const preco = parseFloat(document.getElementById('ajustePreco').value);
 
@@ -272,7 +278,7 @@ document.getElementById('formAjusteSaldo').addEventListener('submit', async (e) 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ tipo, quantidade, observacao, categoria, imagem, preco_compra, preco })
         });
-        
+
         if (res.ok) {
             fecharModalAjuste();
             carregarEstoque();
@@ -320,7 +326,7 @@ document.addEventListener('input', (e) => {
 // ==========================================
 // RELATÓRIOS (IMPRESSÃO/PDF)
 // ==========================================
-window.imprimirRelatorioProdutos = function() {
+window.imprimirRelatorioProdutos = function () {
     const dataHora = new Date().toLocaleString('pt-BR');
     let html = `
         <!DOCTYPE html>
@@ -350,8 +356,8 @@ window.imprimirRelatorioProdutos = function() {
                     <th>Estoque</th>
                 </tr>
                 ${produtosLocais.map(p => {
-                    const alerta = p.qtd <= 5 ? '<span class="badge badge-baixo">Baixo</span>' : '';
-                    return `
+        const alerta = p.qtd <= 5 ? '<span class="badge badge-baixo">Baixo</span>' : '';
+        return `
                     <tr>
                         <td>${p.nome}</td>
                         <td>${p.categoria}</td>
@@ -359,7 +365,7 @@ window.imprimirRelatorioProdutos = function() {
                         <td>${Number(p.preco).toFixed(2)}</td>
                         <td>${p.qtd} un.${alerta}</td>
                     </tr>`;
-                }).join('')}
+    }).join('')}
             </table>
             <script>window.onload = function() { window.print(); }</script>
         </body>
@@ -370,7 +376,7 @@ window.imprimirRelatorioProdutos = function() {
     printWindow.document.close();
 }
 
-window.imprimirRelatorioBalancete = function() {
+window.imprimirRelatorioBalancete = function () {
     const dataHora = new Date().toLocaleString('pt-BR');
     let totalCustoGlobal = 0;
     let totalVendaGlobal = 0;
@@ -380,9 +386,9 @@ window.imprimirRelatorioBalancete = function() {
         const custoUnitario = Number(p.preco_compra || 0);
         const vendaUnitario = Number(p.preco);
         const qtd = Number(p.qtd);
-        
+
         const lucroUnitario = vendaUnitario - custoUnitario;
-        
+
         const totalCustoItem = custoUnitario * qtd;
         const totalVendaItem = vendaUnitario * qtd;
         const totalLucroItem = lucroUnitario * qtd;
