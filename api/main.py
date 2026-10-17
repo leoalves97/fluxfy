@@ -330,6 +330,10 @@ async def gerar_pagamento_pix(dados: PixRequestSchema):
 
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=payload, headers=headers)
+        
+        # Imprime o erro exato no terminal do Docker para sabermos o motivo do 400
+        print(f"RESPOSTA MERCADO PAGO: {response.status_code} - {response.text}")
+
         if response.status_code != 201:
             raise HTTPException(status_code=400, detail=f"Erro ao gerar Pix no Mercado Pago: {response.text}")
         
@@ -341,5 +345,5 @@ async def gerar_pagamento_pix(dados: PixRequestSchema):
             "payment_id": mp_data.get("id"),
             "status": mp_data.get("status"),
             "qr_code_base64": qr_data.get("qr_code_base64"),
-            "qr_code": qr_data.get("qr_code") # O código Pix Copia e Cola
+            "qr_code": qr_data.get("qr_code")
         }
