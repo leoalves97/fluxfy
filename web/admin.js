@@ -2,6 +2,7 @@
  * admin.js 
  * Lógica do Painel Administrativo: Busca usuários pendentes, resumo de vendas e renderiza os gráficos do Dashboard.
  */
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Verificação de Segurança
     const token = localStorage.getItem('tokenCantina');
@@ -98,6 +99,7 @@ async function carregarUsuariosPendentes() {
             `;
             tabela.appendChild(tr);
         });
+
     } catch (error) {
         console.error('Erro ao buscar usuários:', error);
         tabela.innerHTML = `
@@ -134,9 +136,21 @@ async function carregarResumoDashboard() {
         const response = await fetch('https://3.21.52.233.nip.io/api/vendas/resumo');
         if (response.ok) {
             const dados = await response.json();
+
             const cardVendasHoje = document.getElementById('valorVendasHoje');
             if (cardVendasHoje) {
                 cardVendasHoje.textContent = `R$ ${dados.vendas_hoje.toFixed(2).replace('.', ',')}`;
+            }
+
+            const totalPedidosGeral = document.getElementById('totalPedidosGeral');
+            if (totalPedidosGeral) {
+                totalPedidosGeral.textContent = dados.total_pedidos || 0;
+            }
+
+            const ticketMedioGeral = document.getElementById('ticketMedioGeral');
+            if (ticketMedioGeral) {
+                const ticket = dados.total_pedidos > 0 ? (dados.vendas_total / dados.total_pedidos) : 0;
+                ticketMedioGeral.textContent = `R$ ${ticket.toFixed(2).replace('.', ',')}`;
             }
         }
     } catch (error) {
@@ -187,6 +201,43 @@ async function carregarGraficosDashboard() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } }
+            }
+        });
+
+        // 3. Gráfico de Produtos Mais Vendidos (Bar)
+        const ctxProd = document.getElementById('graficoProdutos').getContext('2d');
+        new Chart(ctxProd, {
+            type: 'bar',
+            data: {
+                labels: ['Coca-Cola', 'Salgado Assado', 'Bolo de Pote', 'Suco Natural'],
+                datasets: [{
+                    label: 'Quantidade Vendida',
+                    data: [12, 19, 8, 15],
+                    backgroundColor: '#D4A810'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 4. Gráfico de Categorias de Estoque (Pie)
+        const ctxCat = document.getElementById('graficoCategoriasEstoque').getContext('2d');
+        new Chart(ctxCat, {
+            type: 'pie',
+            data: {
+                labels: ['Bebidas', 'Lanches', 'Sobremesas'],
+                datasets: [{
+                    data: [10, 15, 6],
+                    backgroundColor: ['#3B82F6', '#10B981', '#F5C71A']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
             }
         });
 

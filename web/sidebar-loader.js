@@ -47,9 +47,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Regra aplicada: Operador vê APENAS Caixa e Estoque. Admin vê tudo.
     const menuPermissions = {
         admin: [
-            { url: 'admin.html', label: 'Painel Geral', svg: icons.painel },
+            { url: 'admin.html', label: 'Dashboard', svg: icons.painel },
             { url: 'abertura-caixa.html', label: 'Tela de Caixa', svg: icons.caixa },
             { url: 'estoque.html', label: 'Estoque', svg: icons.estoque },
+            { url: 'financeiro.html', label: 'Painel Financeiro', svg: icons.caixa },
             { url: 'aprovacoes.html', label: 'Permissões de Usuários', svg: icons.usuarios }
         ],
         operador: [
