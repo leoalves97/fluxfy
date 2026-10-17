@@ -42,6 +42,11 @@ class Produto(Base):
     
     qtd = Column(Integer, default=0)
     preco = Column(Numeric(10, 2), default=0.00)
+    
+    # Colunas adicionadas para imagem e preço de compra (custo)
+    imagem = Column(String, nullable=True)
+    preco_compra = Column(Numeric(10, 2), default=0.00)
+    
     data_criacao = Column(DateTime, default=datetime.utcnow)
 
     # Relacionamentos
