@@ -17,6 +17,7 @@ function getCaixaKey(baseKey) {
     const sufixo = usuario && usuario.email ? '_' + usuario.email : '';
     return baseKey + sufixo;
 }
+window.getCaixaKey = getCaixaKey;
 
 document.addEventListener('DOMContentLoaded', () => {
     verificarEstadoCaixa();
@@ -591,7 +592,7 @@ async function processarVendaNoServidor(numeroComandaStr, totalPedido, formaPaga
         saldos[formaPagamento] += totalPedido;
         localStorage.setItem(getCaixaKey('fluxfy_saldos'), JSON.stringify(saldos));
 
-        let movimentos = JSON.parse(localStorage.getItem(getCaKey('fluxfy_movimentos'))) || [];
+        let movimentos = JSON.parse(localStorage.getItem(getCaixaKey('fluxfy_movimentos'))) || [];
         movimentos.push({
             id: Date.now(),
             comanda: numeroComandaStr,
@@ -600,7 +601,7 @@ async function processarVendaNoServidor(numeroComandaStr, totalPedido, formaPaga
             data: obterDataHora(),
             estornado: false
         });
-        localStorage.setItem(getCaKey('fluxfy_movimentos'), JSON.stringify(movimentos));
+        localStorage.setItem(getCaixaKey('fluxfy_movimentos'), JSON.stringify(movimentos));
 
         alert(`Comanda #${numeroComandaStr} Finalizada!\nValor: R$ ${totalPedido.toFixed(2)}\nForma: ${formaPagamento.toUpperCase()}`);
 
