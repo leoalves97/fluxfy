@@ -1,10 +1,12 @@
 /* 
- * header-loader.js 
+ * header-loader.js
  * Ajustado para ocultar Configurações do operador no menu de usuário.
+ * Correção de Segurança: Prevenção de XSS na inicial do usuário via textContent.
  */
 document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("header-container");
     if (!container) return;
+
     const pathSegments = window.location.pathname.split("/");
     const currentPage = pathSegments[pathSegments.length - 1] || "admin.html";
 
@@ -14,10 +16,12 @@ document.addEventListener("DOMContentLoaded", () => {
         "estoque.html": "Gestão de Estoque",
         "abertura-caixa.html": "Frente de Caixa (PDV)"
     };
+
     const tituloPagina = titulos[currentPage] || "Fluxfy";
 
     let inicialUsuario = "U";
     let usuarioLogado = { papel: 'operador' };
+
     if (typeof AuthConfig !== 'undefined') {
         usuarioLogado = AuthConfig.getUsuarioLogado() || { papel: 'operador' };
         if (usuarioLogado && usuarioLogado.email) {
@@ -25,12 +29,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Renderiza itens do menu do usuário com base no papel[cite: 1]
+    // Renderiza itens do menu do usuário com base no papel
     let dropdownItensHtml = `<li><a href="perfil.html" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Meu Perfil</a></li>`;
     if (usuarioLogado.papel === 'admin') {
         dropdownItensHtml += `<li><a href="configuracoes.html" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Configurações</a></li>`;
     }
 
+    // Estrutura HTML do cabeçalho sem dados de entrada bruta na string de innerHTML
     container.innerHTML = `
         <header class="h-16 flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 md:px-6 transition-colors duration-300 w-full">
             <div class="flex items-center gap-3">
@@ -38,18 +43,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
                 <h1 class="text-lg md:text-xl font-bold text-gray-800 dark:text-white truncate">${tituloPagina}</h1>
-            </div>
-                         
+            </div>                    
             <div class="flex items-center gap-3 md:gap-4 relative">
                 <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm p-2 transition-colors cursor-pointer">
                     <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
                     <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
-                </button>
-                                 
+                </button>                                
                 <div class="relative">
-                    <button id="userMenuBtn" class="h-8 w-8 rounded-full bg-fluxfy-yellow text-fluxfy-black flex items-center justify-center font-bold focus:outline-none hover:ring-2 hover:ring-offset-2 hover:ring-fluxfy-yellow transition-all cursor-pointer">
-                        ${inicialUsuario}
-                    </button>
+                    <button id="userMenuBtn" class="h-8 w-8 rounded-full bg-fluxfy-yellow text-fluxfy-black flex items-center justify-center font-bold focus:outline-none hover:ring-2 hover:ring-offset-2 hover:ring-fluxfy-yellow transition-all cursor-pointer"></button>
                     <div id="userDropdown" class="dropdown-menu bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                         <ul class="py-1 text-sm text-gray-700 dark:text-gray-200">
                             ${dropdownItensHtml}
@@ -61,6 +62,12 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         </header>
     `;
+
+    // Injeção segura do texto dinâmico (inicial do usuário)
+    const userBtn = document.getElementById('userMenuBtn');
+    if (userBtn) {
+        userBtn.textContent = inicialUsuario;
+    }
 
     // Eventos de Tema, Dropdown e Logout
     const themeToggleBtn = document.getElementById('theme-toggle');
@@ -74,6 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.documentElement.classList.remove('dark');
         if (darkIcon) darkIcon.classList.remove('hidden');
     }
+
     if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', () => {
             darkIcon.classList.toggle('hidden');
