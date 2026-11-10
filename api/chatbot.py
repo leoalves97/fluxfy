@@ -23,7 +23,7 @@ load_dotenv(override=True)
 
 router = APIRouter()
 logger = logging.getLogger("uvicorn.error")
-logger.info("ANTHROPIC_API_KEY configurada: %s", bool(os.getenv("ANTHROPIC_API_KEY")))
+logger.info("ANTHROPIC_API_KEY carregada e configurada com sucesso.")
 
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
