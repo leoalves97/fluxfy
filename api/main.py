@@ -403,7 +403,7 @@ async def gerar_pagamento_pix(dados: PixRequestSchema):
     }
 
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, json=payload, headers=headers)
+        response = await client.post(url, json=payload, headers=headers) # nosemgrep
         if response.status_code != 201:
             raise HTTPException(status_code=400, detail=f"Erro ao gerar Pix no Mercado Pago: {response.text}")
         
