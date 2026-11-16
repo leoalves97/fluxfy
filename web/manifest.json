@@ -1,0 +1,24 @@
+{
+  "name": "Fluxfy - Sistema de Caixa (PDV)",
+  "short_name": "Fluxfy",
+  "description": "Sistema de frente de caixa, controle de estoque e gestão financeira.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#F5C71A",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "assets/icon/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
