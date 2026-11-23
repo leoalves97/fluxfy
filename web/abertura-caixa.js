@@ -1,12 +1,13 @@
 /*
  * abertura-caixa.js
  * Lógica da Frente de Caixa (PDV), Máquina de Estados, Movimentações e Persistência.
- * Atualizado: Sessões isoladas por usuário logado e layout de imagens horizontal.
+ * Atualizado: Sessões isoladas por usuário logado, layout de imagens horizontal, polling PIX automático, modal de confirmação e comprovante térmico 80mm.
  */
 let carrinho = [];
 let formaPagamentoSelecionada = null;
 let produtosCatalogo = [];
 let pixPollingInterval = null;
+let ultimaVendaConcluida = null;
 
 // Função auxiliar para data local do Brasil
 const obterDataHoje = () => new Date().toLocaleDateString('pt-BR');
@@ -510,8 +511,6 @@ window.finalizarPedido = async function () {
         document.getElementById('pixLoading').classList.remove('hidden');
         document.getElementById('pixConteudo').classList.add('hidden');
 
-        iniciarMonitoramentoPix(data.payment_id);
-
         try {
             const usuarioLogado = typeof AuthConfig !== 'undefined' ? AuthConfig.getUsuarioLogado() : null;
             const emailPayer = usuarioLogado && usuarioLogado.email ? usuarioLogado.email : 'cliente@fluxfy.com';
@@ -534,6 +533,9 @@ window.finalizarPedido = async function () {
 
             document.getElementById('pixLoading').classList.add('hidden');
             document.getElementById('pixConteudo').classList.remove('hidden');
+
+            // Inicia a verificação automática a cada 3 segundos
+            iniciarMonitoramentoPix(data.payment_id);
 
         } catch (err) {
             console.error(err);
@@ -614,11 +616,18 @@ window.concluirPedidoPixAprovado = function () {
 
 // Função unificada para processar a venda e atualizar os saldos/movimentos
 async function processarVendaNoServidor(numeroComandaStr, totalPedido, formaPagamento) {
+    const itensSnapshot = carrinho.map(i => ({
+        id: i.id,
+        nome: i.nome,
+        preco: Number(i.preco),
+        quantidade: i.quantidade
+    }));
+
     const dadosVenda = {
         comanda: numeroComandaStr,
         forma_pagamento: formaPagamento,
         total: totalPedido,
-        itens: carrinho.map(i => ({ id: i.id, nome: i.nome, preco: i.preco, quantidade: i.quantidade }))
+        itens: itensSnapshot
     };
 
     try {
@@ -630,6 +639,8 @@ async function processarVendaNoServidor(numeroComandaStr, totalPedido, formaPaga
 
         if (!response.ok) throw new Error('Erro ao registrar venda no servidor.');
 
+        const dataHoraVenda = obterDataHora();
+
         let saldos = JSON.parse(localStorage.getItem(getCaixaKey('fluxfy_saldos'))) || { dinheiro: 0, pix: 0, cartao: 0 };
         saldos[formaPagamento] += totalPedido;
         localStorage.setItem(getCaixaKey('fluxfy_saldos'), JSON.stringify(saldos));
@@ -640,13 +651,39 @@ async function processarVendaNoServidor(numeroComandaStr, totalPedido, formaPaga
             comanda: numeroComandaStr,
             valor: totalPedido,
             forma_pagamento: formaPagamento,
-            data: obterDataHora(),
+            data: dataHoraVenda,
             estornado: false
         });
         localStorage.setItem(getCaixaKey('fluxfy_movimentos'), JSON.stringify(movimentos));
 
-        alert(`Comanda #${numeroComandaStr} Finalizada!\nValor: R$ ${totalPedido.toFixed(2)}\nForma: ${formaPagamento.toUpperCase()}`);
+        // Salva os dados da venda atual para impressão do comprovante térmico
+        ultimaVendaConcluida = {
+            comanda: numeroComandaStr,
+            forma_pagamento: formaPagamento,
+            total: totalPedido,
+            data: dataHoraVenda,
+            itens: itensSnapshot
+        };
 
+        // Atualiza dados do Modal de Sucesso
+        document.getElementById('sucessoComanda').textContent = `#${numeroComandaStr}`;
+        document.getElementById('sucessoForma').textContent = formaPagamento.toUpperCase();
+        document.getElementById('sucessoTotal').textContent = `R$ ${totalPedido.toFixed(2).replace('.', ',')}`;
+
+        const tituloEl = document.getElementById('tituloModalSucesso');
+        const subtituloEl = document.getElementById('subtituloModalSucesso');
+
+        if (formaPagamento === 'pix') {
+            tituloEl.textContent = 'Pagamento PIX Efetuado!';
+            subtituloEl.textContent = 'Recebimento confirmado automaticamente pelo Mercado Pago.';
+        } else {
+            tituloEl.textContent = 'Venda Finalizada!';
+            subtituloEl.textContent = 'Pedido registrado e estoque atualizado.';
+        }
+
+        document.getElementById('modalVendaConcluida').classList.remove('hidden');
+
+        // Prepara o caixa para o próximo pedido
         let numAtual = parseInt(localStorage.getItem(getCaixaKey('fluxfy_comanda_atual'))) || 1;
         localStorage.setItem(getCaixaKey('fluxfy_comanda_atual'), numAtual + 1);
 
@@ -660,3 +697,137 @@ async function processarVendaNoServidor(numeroComandaStr, totalPedido, formaPaga
         alert('Atenção: A venda foi finalizada localmente, mas houve uma falha ao registrar no servidor.');
     }
 }
+
+window.fecharModalVendaConcluida = function () {
+    document.getElementById('modalVendaConcluida').classList.add('hidden');
+};
+
+// ==========================================
+// COMPROVANTE TÉRMICO NÃO FISCAL (80mm)
+// ==========================================
+window.imprimirComprovanteTermico = function () {
+    if (!ultimaVendaConcluida) {
+        alert('Nenhum comprovante disponível para impressão.');
+        return;
+    }
+
+    const v = ultimaVendaConcluida;
+    const usuario = typeof AuthConfig !== 'undefined' ? AuthConfig.getUsuarioLogado() : null;
+    const operador = usuario && usuario.email ? usuario.email : 'Operador PDV';
+
+    const linhasItensHtml = v.itens.map(item => {
+        const subtotal = (item.preco * item.quantidade).toFixed(2).replace('.', ',');
+        const unitario = item.preco.toFixed(2).replace('.', ',');
+        return `
+            <tr>
+                <td colspan="3" class="item-nome">${item.nome}</td>
+            </tr>
+            <tr class="item-detalhe">
+                <td>${item.quantidade}x R$ ${unitario}</td>
+                <td></td>
+                <td class="right">R$ ${subtotal}</td>
+            </tr>
+        `;
+    }).join('');
+
+    const htmlCupom = `
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <title>Comprovante #${v.comanda} - Fluxfy</title>
+            <style>
+                @page {
+                    size: 80mm auto;
+                    margin: 0;
+                }
+                body {
+                    font-family: 'Courier New', Courier, monospace;
+                    width: 72mm;
+                    margin: 0 auto;
+                    padding: 8px 4px;
+                    color: #000;
+                    font-size: 12px;
+                    line-height: 1.3;
+                }
+                .center { text-align: center; }
+                .right { text-align: right; }
+                .bold { font-weight: bold; }
+                .titulo { font-size: 16px; font-weight: bold; letter-spacing: 1px; }
+                .subtitulo { font-size: 10px; margin-top: 2px; }
+                .divisor { border-top: 1px dashed #000; margin: 8px 0; }
+                table { width: 100%; border-collapse: collapse; }
+                .item-nome { padding-top: 4px; font-weight: bold; }
+                .item-detalhe td { padding-bottom: 4px; font-size: 11px; }
+                .total-row { font-size: 14px; font-weight: bold; }
+                .rodape { font-size: 10px; margin-top: 12px; text-align: center; }
+            </style>
+        </head>
+        <body>
+            <div class="center">
+                <div class="titulo">FLUXFY PDV</div>
+                <div class="subtitulo">COMPROVANTE NÃO FISCAL</div>
+            </div>
+
+            <div class="divisor"></div>
+
+            <div>
+                <div><strong>COMANDA:</strong> #${v.comanda}</div>
+                <div><strong>DATA:</strong> ${v.data}</div>
+                <div><strong>OPERADOR:</strong> ${operador}</div>
+            </div>
+
+            <div class="divisor"></div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="text-align:left; font-size:11px;">QTD / UNIT</th>
+                        <th></th>
+                        <th class="right" style="font-size:11px;">TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${linhasItensHtml}
+                </tbody>
+            </table>
+
+            <div class="divisor"></div>
+
+            <table>
+                <tr class="total-row">
+                    <td>TOTAL PAGO:</td>
+                    <td class="right">R$ ${v.total.toFixed(2).replace('.', ',')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-top:4px;">FORMA PAGTO:</td>
+                    <td class="right bold" style="padding-top:4px; text-transform:uppercase;">${v.forma_pagamento}</td>
+                </tr>
+                ${v.forma_pagamento === 'pix' ? `
+                <tr>
+                    <td colspan="2" class="center" style="padding-top:6px; font-size:11px;">
+                        *** PAGAMENTO PIX CONFIRMADO ***
+                    </td>
+                </tr>` : ''}
+            </table>
+
+            <div class="divisor"></div>
+
+            <div class="rodape">
+                Documento sem valor fiscal.<br>
+                Obrigado pela preferência!
+            </div>
+
+            <script>
+                window.onload = function() {
+                    window.print();
+                };
+            </script>
+        </body>
+        </html>
+    `;
+
+    const janelaCupom = window.open('', '_blank', 'width=380,height=600');
+    janelaCupom.document.write(htmlCupom);
+    janelaCupom.document.close();
+};

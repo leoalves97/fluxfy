@@ -265,5 +265,52 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL: Venda Concluída com Sucesso -->
+    <div id="modalVendaConcluida" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-gray-100 dark:border-gray-700 text-center transform transition-all">
+            <!-- Ícone de Sucesso -->
+            <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-9 h-9 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+
+            <h3 id="tituloModalSucesso" class="text-xl font-extrabold text-gray-900 dark:text-white mb-1">
+                Venda Finalizada!
+            </h3>
+            <p id="subtituloModalSucesso" class="text-sm font-medium text-green-600 dark:text-green-400 mb-5">
+                Pagamento confirmado com sucesso.
+            </p>
+
+            <!-- Card de Resumo do Pedido -->
+            <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 mb-6 border border-gray-200 dark:border-gray-700 text-left space-y-2.5 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-500 dark:text-gray-400">Comanda:</span>
+                    <strong id="sucessoComanda" class="text-gray-900 dark:text-white">#001</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500 dark:text-gray-400">Forma de Pagamento:</span>
+                    <strong id="sucessoForma" class="text-gray-900 dark:text-white uppercase">PIX</strong>
+                </div>
+                <div class="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-700 text-base">
+                    <span class="text-gray-600 dark:text-gray-300 font-medium">Total Pago:</span>
+                    <strong id="sucessoTotal" class="text-fluxfy-dark dark:text-fluxfy-yellow font-extrabold">R$ 0,00</strong>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2.5">
+                <button onclick="imprimirComprovanteTermico()" class="w-full py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold rounded-xl border border-gray-300 dark:border-gray-600 transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    Imprimir Comprovante
+                </button>
+                <button onclick="fecharModalVendaConcluida()" id="btnFecharSucesso" class="w-full py-3 bg-fluxfy-yellow hover:bg-fluxfy-dark text-fluxfy-black font-bold rounded-xl shadow transition-colors">
+                    Novo Pedido
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
