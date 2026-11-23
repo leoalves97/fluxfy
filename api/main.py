@@ -1,6 +1,6 @@
 import os
 import httpx
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
@@ -382,7 +382,7 @@ class PixRequestSchema(BaseModel):
     payer_email: str
 
 @app.post("/api/pagamento/pix")
-async def gerar_pagamento_pix(dados: PixRequestSchema):
+async def gerar_pagamento_pix(dados: PixRequestSchema, db = Depends(get_db)):
     mp_token = os.getenv("MERCADOPAGO_ACCESS_TOKEN")
     if not mp_token:
         raise HTTPException(status_code=500, detail="Token do Mercado Pago não configurado no servidor.")
@@ -397,6 +397,7 @@ async def gerar_pagamento_pix(dados: PixRequestSchema):
         "transaction_amount": dados.transaction_amount,
         "description": dados.description,
         "payment_method_id": "pix",
+        "notification_url": "https://3.21.52.233.nip.io/api/webhook/mercadopago",
         "payer": {
             "email": dados.payer_email
         }
@@ -408,12 +409,70 @@ async def gerar_pagamento_pix(dados: PixRequestSchema):
             raise HTTPException(status_code=400, detail=f"Erro ao gerar Pix no Mercado Pago: {response.text}")
         
         mp_data = response.json()
+        payment_id = str(mp_data.get("id"))
+        status_inicial = mp_data.get("status", "pending")
+
+        # Salva o registro pendente no banco de dados
+        novo_pix = models.PagamentoPix(
+            payment_id=payment_id,
+            status=status_inicial,
+            valor=dados.transaction_amount
+        )
+        db.add(novo_pix)
+        db.commit()
+
         point_of_interaction = mp_data.get("point_of_interaction", {})
         qr_data = point_of_interaction.get("transaction_data", {})
 
         return {
-            "payment_id": mp_data.get("id"),
-            "status": mp_data.get("status"),
+            "payment_id": payment_id,
+            "status": status_inicial,
             "qr_code_base64": qr_data.get("qr_code_base64"),
             "qr_code": qr_data.get("qr_code")
         }
+
+@app.post("/api/webhook/mercadopago")
+async def webhook_mercadopago(request: Request, db = Depends(get_db)):
+    try:
+        body = await request.json()
+    except Exception:
+        return {"status": "ignored"}
+
+    # O Mercado Pago envia notificações de pagamento com type == "payment" ou action == "payment.updated"
+    data_id = body.get("data", {}).get("id")
+    tipo = body.get("type") or body.get("topic")
+
+    if data_id and tipo == "payment":
+        mp_token = os.getenv("MERCADOPAGO_ACCESS_TOKEN")
+        # Boa prática: sempre consultar a API oficial do MP para validar se o status é realmente 'approved'
+        url = f"https://api.mercadopago.com/v1/payments/{data_id}"
+        headers = {"Authorization": f"Bearer {mp_token}"}
+
+        async with httpx.AsyncClient() as client:
+            res = await client.get(url, headers=headers) # nosemgrep
+            if res.status_code == 200:
+                pagamento_mp = res.json()
+                status_atual = pagamento_mp.get("status")
+
+                registro = db.query(models.PagamentoPix).filter(
+                    models.PagamentoPix.payment_id == str(data_id)
+                ).first()
+
+                if registro and status_atual == "approved":
+                    registro.status = "approved"
+                    db.commit()
+
+    # Sempre retornar 200 OK para o Mercado Pago parar de reenviar a notificação
+    return {"status": "received"}
+
+
+@app.get("/api/pagamento/pix/status/{payment_id}")
+def verificar_status_pix(payment_id: str, db = Depends(get_db)):
+    registro = db.query(models.PagamentoPix).filter(
+        models.PagamentoPix.payment_id == str(payment_id)
+    ).first()
+
+    if not registro:
+        raise HTTPException(status_code=404, detail="Pagamento não encontrado")
+
+    return {"payment_id": registro.payment_id, "status": registro.status}

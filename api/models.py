@@ -80,3 +80,13 @@ class ItemVenda(Base):
     
     venda = relationship("Venda", back_populates="itens")
     produto_rel = relationship("Produto", back_populates="itens_venda")
+
+
+class PagamentoPix(Base):
+    __tablename__ = "pagamentos_pix"
+
+    id = Column(Integer, primary_key=True, index=True)
+    payment_id = Column(String, unique=True, index=True, nullable=False)
+    status = Column(String, default="pending")  # 'pending', 'approved', 'cancelled'
+    valor = Column(Numeric(10, 2), nullable=False)
+    data_criacao = Column(DateTime, default=datetime.utcnow)
