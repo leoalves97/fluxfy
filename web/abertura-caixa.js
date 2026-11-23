@@ -6,6 +6,7 @@
 let carrinho = [];
 let formaPagamentoSelecionada = null;
 let produtosCatalogo = [];
+let pixPollingInterval = null;
 
 // Função auxiliar para data local do Brasil
 const obterDataHoje = () => new Date().toLocaleDateString('pt-BR');
@@ -509,6 +510,8 @@ window.finalizarPedido = async function () {
         document.getElementById('pixLoading').classList.remove('hidden');
         document.getElementById('pixConteudo').classList.add('hidden');
 
+        iniciarMonitoramentoPix(data.payment_id);
+
         try {
             const usuarioLogado = typeof AuthConfig !== 'undefined' ? AuthConfig.getUsuarioLogado() : null;
             const emailPayer = usuarioLogado && usuarioLogado.email ? usuarioLogado.email : 'cliente@fluxfy.com';
@@ -552,7 +555,45 @@ function atualizarNumeroComanda() {
 // ==========================================
 // INTEGRAÇÃO COM MERCADO PAGO (PIX)
 // ==========================================
+function iniciarMonitoramentoPix(paymentId) {
+    pararMonitoramentoPix(); // Garante que não existam dois loops rodando juntos
+
+    let tentativas = 0;
+    const maxTentativas = 100; // Limite de ~5 minutos (100 * 3s)
+
+    pixPollingInterval = setInterval(async () => {
+        tentativas++;
+        if (tentativas > maxTentativas) {
+            pararMonitoramentoPix();
+            alert('Tempo limite para pagamento PIX expirado. Gere um novo código.');
+            fecharModalPix();
+            return;
+        }
+
+        try {
+            const res = await fetch(`https://3.21.52.233.nip.io/api/pagamento/pix/status/${paymentId}`);
+            if (res.ok) {
+                const statusData = await res.json();
+                if (statusData.status === 'approved') {
+                    pararMonitoramentoPix();
+                    concluirPedidoPixAprovado();
+                }
+            }
+        } catch (err) {
+            console.warn('Erro ao consultar status do PIX:', err);
+        }
+    }, 3000);
+}
+
+function pararMonitoramentoPix() {
+    if (pixPollingInterval) {
+        clearInterval(pixPollingInterval);
+        pixPollingInterval = null;
+    }
+}
+
 window.fecharModalPix = function () {
+    pararMonitoramentoPix();
     document.getElementById('modalPix').classList.add('hidden');
 };
 
@@ -564,7 +605,8 @@ window.copiarPixCopiaCola = function () {
 };
 
 window.concluirPedidoPixAprovado = function () {
-    fecharModalPix();
+    pararMonitoramentoPix();
+    document.getElementById('modalPix').classList.add('hidden');
     const totalPedido = carrinho.reduce((acc, item) => acc + (item.preco * item.quantidade), 0);
     const numeroComandaStr = document.getElementById('numeroComanda').textContent;
     processarVendaNoServidor(numeroComandaStr, totalPedido, 'pix');
